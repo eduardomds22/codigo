@@ -1,0 +1,450 @@
+#include <iostream>
+#include <windows.h>
+#include <conio.h>
+#include <cstdlib>
+#include <ctime>
+#include <thread> ///BIBLIOTECA UTILIZADA PARA FAZER O FUNCIONAMENTO DO CRONOMETRO DA BOMBA
+using namespace std;
+
+bool bombaExiste = false;
+void imprimirMapa(const int m[21][40], int x, int y,int a,int b,int c,int d,int e,int f,int g,int h, COORD coord) {
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+
+        //IMPRIME O MAPA E OS PERSONAGENS
+        for(int i=0;i<21;i++){
+            for(int j=0;j<40;j++){
+                if (i == x && j == y) {
+                cout<< char(139); //USUARIO
+                }else if ((i == a && j == b) || (i == c && j == d) || (i == e && j == f) || (i == g && j == h)) {
+                cout << char(148); //INIMIGOS
+
+                }else {
+                    switch (m[i][j]){
+                        case 0: cout<<  " ";       break; //CAMINHO
+                        case 1: cout<<  char(219); break;  //PAREDE INSDESTRUTIVEL
+                        case 2: cout<<  char(177); break; //PAREDE DESTRUTIVEL
+                        case 3: cout << char(207); break; //BOMBA
+                        case'*':cout << char(158);       break; //RAIO DE EXPLOSAO DA BOMBA
+
+                    }
+                }
+            }
+            cout<<"\n";
+        }
+}
+
+bool posicaoOcupadaPelaBomba(int x, int y, int m[21][40]) {
+    return (m[x][y] == 3); //CARACTER QUE REPRESENTA A BOMBAE
+
+
+}
+
+void colocarBomba(int x, int y, int m[21][40]) {
+    if (!bombaExiste) {
+        m[x][y] = 3;
+        bombaExiste = true;
+    }
+}
+
+void detonarBomba(int x, int y, int m[21][40]) {
+    //EXPLOSAO NA POSICAO DA BOMBA
+    m[x][y] = '*'; //RAIO DA EXPLOSAO
+
+    //CIMA
+    if (x > 0 && m[x - 1][y] != 1) {
+        m[x - 1][y] = '*';
+    }
+
+    //BAIXO
+    if (x < 20 && m[x + 1][y] != 1) {
+        m[x + 1][y] = '*';
+    }
+
+    //ESQUERDA
+    if (y > 0 && m[x][y - 1] != 1) {
+        m[x][y - 1] = '*';
+    }
+
+    //DIREITA
+    if (y < 34 && m[x][y + 1] != 1) {
+        m[x][y + 1] = '*';
+    }
+
+    bombaExiste = false;
+
+    //ESPERA 1 SEGUNDO PARA A EXPLOSAO SER REMOVIDA
+    Sleep(1000);
+
+    //REMOVE A EXPLOSAO
+    m[x][y] = 0;
+    if (x > 0 && m[x - 1][y] == '*') {
+        m[x - 1][y] = 0;
+    }
+    if (x < 20 && m[x + 1][y] == '*') {
+        m[x + 1][y] = 0;
+    }
+    if (y > 0 && m[x][y - 1] == '*') {
+        m[x][y - 1] = 0;
+    }
+    if (y < 34 && m[x][y + 1] == '*') {
+        m[x][y + 1] = 0;
+    }
+}
+void verificarExplosao(int x, int y, int& a, int& b, int& c, int& d, int& e, int& f, int& g, int& h, int m[21][40]) {
+    //VERIFICA SE O USUARIO FOI EXPLODIDO PELA BOMBA
+    if (m[x][y] == '*') {
+        cout << "\n - VOCE PERDEU POIS FOI ATINGIDO PELA EXPLOSAO !!!" << endl;
+        exit(0); //ENCERRA O PROGRAMA
+    }
+
+    //VERIFICA SE OS INIMIGOS FORAM ATINGIDOS
+    if (m[a][b] == '*') {
+        a = 1;
+        b = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
+    }
+    if (m[c][d] == '*') {
+       c = 7;
+       d = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
+    }
+    if (m[e][f] == '*') {
+        e = 18;
+        f = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
+    }
+    if (m[g][h] == '*') {
+        g = 12;
+        h = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
+    }
+}
+void explosaoAssincrona(int x, int y, int m[21][40]) {
+    Sleep(3000); // ESPERA 3 SEGUNDOS PARA EXPLODIR
+    detonarBomba(x, y, m);
+}
+
+bool verificarVitoria(int a, int b, int c, int d, int e, int f, int g, int h) { ///VERIFICA SE TODOS OS INIMIGOS FORAM DERROTADOS
+    return (a == 1 && b == 38 && c == 7 && d == 38 && e == 18 && f == 38 && g == 12 && h == 38);
+}
+
+int main(){
+
+    srand(time(NULL));
+    char tecla1;
+    int num, escolha, dificuldade=30;
+    bool back=false, voltar=false, ganhou=true;
+
+    while(back==false){
+        system("cls");
+        voltar=false;
+        cout << "_" << endl;
+        cout << "     * BEM VINDO AO BOMBERMAN *    " << endl;
+        cout << "        |* MENU DE OPCOES *|     \n" << endl;
+        cout << "  1 - INICIAR O JOGO               " << endl;
+        cout << "  2 - ESCOLHA DA DIFICULDADE       " << endl;
+        cout << "  3 - CRIADORES                    " << endl;
+        cout << "  4 - TUTORIAL E REGRAS DO JOGO    " << endl;
+        cout << "  5 - SAIR DO JOGO                 " << endl;
+        cout << "_" << endl;
+        cin >> escolha;
+        system("cls");
+
+
+        if(escolha==1){ //INICIA O JOGO
+            back=true;
+        }
+        if(escolha==2){ // ESCOLHA DA DIFICULDADE
+                while (voltar==false){
+                    cout << "_\n " << endl; // ESCOLHER O TEMPO DE MOVIMENTO DOS INIMIGOS DO JOGO
+                    cout << "     |SELECIONE A DIFICULDADE| \n       " << endl;
+                    cout << "          1 - FACIL                     " << endl;
+                    cout << "          2 - MEDIO                     " << endl;
+                    cout << "          3 - DIFICIL\n                 " << endl;
+                    cout << "  DIGITE [0] PARA RETORNAR AO MENU\n    " << endl;
+                    cout << "_____________________________________   " << endl;
+                    cin >> escolha;
+                    system("cls");
+                    if(escolha == 1){
+                        dificuldade=40;
+                        cout << "_______________________________________________________________  " << endl;
+                        cout << " * DIFICULDADE ALTERADA - VOCE SELECIONOU A DIFICULDADE FACIL *  " << endl;
+                        cout << "_______________________________________________________________  " << endl;
+                        Sleep(2000);
+                        system("cls");
+                    }
+                    if(escolha == 2){
+                        dificuldade=30;
+                        cout << "_______________________________________________________________  " << endl;
+                        cout << " * DIFICULDADE ALTERADA - VOCE SELECIONOU A DIFICULDADE MEDIA *  " << endl;
+                        cout << "_______________________________________________________________  " << endl;
+                        Sleep(2000);
+                        system("cls");
+                    }
+                    if(escolha == 3){
+                        dificuldade=40;
+                        cout << "_______________________________________________________________  " << endl;
+                        cout << " * DIFICULDADE ALTERADA - VOCE SELECIONOU A DIFICULDADE FACIL *  " << endl;
+                        cout << "_______________________________________________________________  " << endl;
+                        Sleep(2000);
+                        system("cls");
+                    }
+                    if(escolha == 0){
+                        voltar=true;
+                    }
+                }
+        }
+        if (escolha==3){ //INFORMAÇÃO SOBRE ALUNOS E PROFESSOR
+            cout << "_______________________________________________________________  " << endl;
+            cout << "               * INFORMACAO SOBRE OS CRIADORES * \n             " << endl;
+            cout << "                CAIO CARDOSO  -  EDUARDOS MENDES \n              " << endl;
+            cout << "                   ALGORITMOS E PROGRAMACAO II \n                " << endl;
+            cout << "                    PROFESSOR - ALEX RESE  \n                    " << endl;
+            cout << "_______________________________________________________________  " << endl;
+            system("pause");
+            }
+        if (escolha==4){ //REGRAS E TUTORIAL DO JOGO
+            cout << "____________________________________________________________________  " << endl;
+            cout << "                   * REGRAS DO JOGO E TUTORIAL * \n                   " << endl;
+            cout << "     O JOGADOR DEVE USAR AS SEGUINTES TECLAS PARA SE MOVIMENTAR :     " << endl;
+            cout << "    A = DIREITA, S = BAIXO, D = ESQUERDA, W = CIMA OU PELAS SETAS \n  " << endl;
+            cout << "       O JOGADOR DEVE APERTAR A TECLA ESPAÇO PARA SOLTAR A BOMBA\n    " << endl;
+            cout << "   - O JOGADOR GANHA AO PRENDER OS INIMIGOS QUANDO SAO EXPLODIDOS -   " << endl;
+            cout << "   -  O JOGADOR NAO PODE SER ATINGIDO PELA BOMBA E NEM SE COLIDIR -   " << endl;
+            cout << "____________________________________________________________________  " << endl;
+            system("pause");
+        }
+        if (escolha==5){
+           cout << "____________________________________________________________________  " << endl;
+           cout << "      !!!    VOCE ENCERROU O JOGO, ATE UMA PROXIMA VEZ   !!!          " << endl;
+           cout << "____________________________________________________________________  " << endl;
+            return 0;
+        }
+    }
+
+        //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
+        //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+        HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_CURSOR_INFO     cursorInfo;
+        GetConsoleCursorInfo(out, &cursorInfo);
+        cursorInfo.bVisible = false; // set the cursor visibilite
+        SetConsoleCursorInfo(out, &cursorInfo);
+        //FIM: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+        //INICIO: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+        short int CX=0, CY=0;
+        COORD coord;
+        coord.X = CX;
+        coord.Y = CY;
+        //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+        //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
+
+int m[21][40] = {   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1},
+
+                    {1,0,0,0,0,2,2,0,2,0,2,2,2,0,2,2,0,2,2,2,0,0,0,0,0,0,0,2,2,2,0,0,0,0,1,0,0,1,0,1},
+
+                    {1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,0,2,0,0,2,2,2,2,2,2,2,0,0,0,1,0,0,1,1,1},
+
+                    {1,0,2,2,2,0,0,1,2,2,2,0,1,0,0,2,2,1,2,2,2,2,1,0,0,0,0,1,2,0,0,0,0,0,1,0,0,0,0,0},
+
+                    {1,2,2,0,2,0,0,2,0,2,2,2,2,0,0,2,0,0,2,0,0,0,2,0,2,2,2,2,2,0,0,0,0,2,1,0,0,0,0,0},
+
+                    {1,2,2,0,2,2,2,2,2,2,0,0,2,0,0,2,0,0,2,0,2,2,2,2,0,0,0,0,0,0,0,2,2,2,1,0,0,0,0,0},
+
+                    {1,0,2,0,0,0,0,2,2,0,0,0,2,2,2,0,2,0,0,0,2,2,2,0,0,2,2,2,0,2,0,0,2,0,1,0,0,1,1,1},
+
+                    {1,2,0,2,0,0,0,1,2,0,0,0,1,2,2,2,2,1,2,2,2,2,1,2,2,2,2,1,2,2,0,0,2,0,1,0,0,1,0,1},
+
+                    {1,0,2,2,2,2,2,2,2,0,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0,2,2,2,0,0,0,2,0,1,0,0,1,1,1},
+
+                    {1,0,0,0,0,2,2,0,2,0,2,2,2,0,0,0,0,0,0,0,0,0,2,0,0,0,0,2,2,2,0,0,2,0,1,0,0,0,0,0},
+
+                    {1,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,2,0,2,2,2,2,2,2,2,2,0,2,1,0,0,0,0,0},
+
+                    {1,0,2,2,2,0,0,1,2,2,2,0,1,2,2,2,2,1,2,2,2,2,1,0,0,0,0,1,2,0,0,0,0,0,1,0,0,1,1,1},
+
+                    {1,2,2,0,2,0,0,2,0,2,2,2,2,0,0,2,0,0,2,0,0,0,2,0,0,2,2,2,2,0,0,0,0,2,1,0,0,1,0,1},
+
+                    {1,2,2,0,2,2,2,2,2,2,0,0,2,0,0,2,0,0,2,0,2,2,2,0,0,0,2,2,0,0,0,2,2,2,1,0,0,1,1,1},
+
+                    {1,0,2,0,0,0,0,2,2,0,0,0,2,2,2,0,2,0,0,0,2,2,2,0,0,2,2,2,0,0,0,0,2,0,1,0,0,0,0,0},
+
+                    {1,2,0,2,0,0,0,1,2,0,0,0,1,2,2,2,2,1,2,2,2,2,1,2,2,2,2,1,2,2,0,0,2,0,1,0,0,0,0,0},
+
+                    {1,0,0,2,2,2,2,0,2,2,0,0,2,0,0,0,2,0,2,0,0,0,0,0,0,2,2,0,0,2,0,0,2,0,1,0,0,0,0,0},
+
+                    {1,0,0,0,2,0,0,0,0,2,0,0,2,2,0,2,2,2,2,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,1},
+
+                    {1,0,0,0,0,0,2,0,2,2,0,0,2,0,0,2,2,0,0,0,0,0,2,2,2,2,0,0,0,2,0,0,0,0,1,0,0,1,0,1},
+
+                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1},};
+
+    //POSICAO INICIAL DOS JOGADORES E INIMIGOS
+    int x=1, y=1, a=1, b=33, c=18, d=1, e=18, f=33, g=9, h=17;
+
+    //TECLAS A SEREM PRESSIONADAS
+    char tecla;
+    while(true || ganhou==true){
+
+        imprimirMapa(m, x, y,a,b,c,d,e,f,g,h, coord); //IMPRIME O MAPA
+
+        if (x == a && y == b || x == c && y == d || x == e && y == f || x == g && y == h) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
+            cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO -" << endl;
+            return 0;
+        }
+
+            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
+            if (!bombaExiste && verificarVitoria(a, b, c, d, e, f, g, h)) {
+                cout << "!!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E VENCEU O JOGO !!!" << endl;
+                return 0;
+            }
+
+        //EXECUTA OS MOVIMENTOS DO USUARIO
+         if (_kbhit()) {
+            tecla = getch();
+            switch(tecla)
+            {
+
+                case 72: case 'w': ///CIMA
+                if(m[x - 1][y] != 1 && m[x - 1][y] != 2 && !posicaoOcupadaPelaBomba(x - 1, y, m)) {
+                    x--;
+                }
+                break;
+
+                case 80: case 's': ///BAIXO
+                if(m[x + 1][y] != 1 && m[x + 1][y] != 2 && !posicaoOcupadaPelaBomba(x + 1, y, m)) {
+                    x++;
+                }
+                break;
+
+                case 75:case 'a': ///ESQUERDA
+                if (m[x][y - 1] != 1 && m[x][y - 1] != 2 && !posicaoOcupadaPelaBomba(x, y - 1, m)) {
+                    y--;
+                }
+                break;
+
+
+                case 77: case 'd': ///DIREITA
+                if (m[x][y + 1] != 1 && m[x][y + 1] != 2 && !posicaoOcupadaPelaBomba(x, y + 1, m)) {
+                    y++;
+                }
+                break;
+
+                case 32: /// ESPAÇO PARA COLOCACAO DA BOMBA
+                if (!bombaExiste) {
+                    colocarBomba(x, y, m);
+                    bombaExiste = true;
+                    thread t(explosaoAssincrona, x, y, m);
+                    t.detach(); // DESANEXA A THREND
+                }
+                break;
+          }
+        }
+
+        ///MOVIMENTACAO DOS INIMIGOS - IMPEDE COLISAO COM PAREDES E A POSICAO QUE A BOMBA OCUPA ANTES DE SER EXPLODIDA
+        int MovimentoAleatorio1 = rand() % dificuldade + 1;
+        switch(MovimentoAleatorio1){
+
+        case 1:
+             if(m[a - 1][b] != 1 && m[a - 1][b] != 2 && !posicaoOcupadaPelaBomba(a - 1, b, m)) {
+                a--;
+        } break;
+
+        case 2:
+            if(m[a + 1][b] != 1 && m[a + 1][b] != 2 && !posicaoOcupadaPelaBomba(a + 1, b, m)) {
+                a++;
+        } break;
+
+        case 3:
+            if (m[a][b - 1] != 1 && m[a][b - 1] != 2&& !posicaoOcupadaPelaBomba(a, b - 1, m)) {
+                b--;
+        } break;
+
+        case 4:
+            if (m[a][b + 1] != 1 && m[a][b + 1] != 2 && !posicaoOcupadaPelaBomba(a, b + 1, m)) {
+                b++;
+        } break;
+
+        }
+        int MovimentoAleatorio2 = rand() % dificuldade + 1;
+        switch(MovimentoAleatorio2){
+
+        case 1:
+             if(m[c - 1][d] != 1 && m[c - 1][d] != 2 && !posicaoOcupadaPelaBomba(c - 1, d, m)) {
+                c--;
+        } break;
+
+        case 2:
+            if(m[c + 1][d] != 1 && m[c + 1][d] != 2&& !posicaoOcupadaPelaBomba(c + 1, d, m)) {
+                c++;
+        } break;
+
+        case 3:
+            if (m[c][d - 1] != 1 && m[c][d - 1] != 2 && !posicaoOcupadaPelaBomba(c, d - 1, m)) {
+                d--;
+        } break;
+
+        case 4:
+            if (m[c][d + 1] != 1 && m[c][d + 1] != 2 && !posicaoOcupadaPelaBomba(c, d + 1, m)) {
+                d++;
+        } break;
+
+        }
+        int MovimentoAleatorio3 = rand() % dificuldade + 1;
+        switch(MovimentoAleatorio3){
+
+        case 1:
+             if(m[e - 1][f] != 1 && m[e - 1][f] != 2 && !posicaoOcupadaPelaBomba(e - 1, f, m)) {
+                e--;
+        } break;
+
+
+        case 2:
+            if(m[e + 1][f] != 1 && m[e + 1][f] != 2 && !posicaoOcupadaPelaBomba(e + 1, f, m)) {
+                e++;
+        } break;
+
+
+        case 3:
+            if (m[e][f - 1] != 1 && m[e][f - 1] != 2 && !posicaoOcupadaPelaBomba(e, f - 1, m)) {
+                f--;
+        } break;
+
+        case 4:
+            if (m[e][f + 1] != 1 && m[e][f + 1] != 2&& !posicaoOcupadaPelaBomba(e, f + 1, m)) {
+                f++;
+        } break;
+
+    }
+
+        int MovimentoAleatorio4 = rand() % dificuldade + 1; //movimentaçao do inimigo
+        switch(MovimentoAleatorio4){
+
+        case 1:
+             if(m[g - 1][h] != 1 && m[g - 1][h] != 2 && !posicaoOcupadaPelaBomba(g - 1, h, m)) {
+                g--;
+        } break;
+
+        case 2:
+            if(m[g + 1][h] != 1 && m[g + 1][h] != 2 && !posicaoOcupadaPelaBomba(g + 1, h, m)) {
+                g++;
+        } break;
+
+        case 3:
+            if (m[g][h - 1] != 1 && m[g][h - 1] != 2  && !posicaoOcupadaPelaBomba(g, h - 1, m)) {
+                h--;
+        } break;
+
+        case 4:
+            if (m[g][h + 1] != 1 && m[g][h + 1] != 2 && !posicaoOcupadaPelaBomba(g, h + 1, m)) {
+                h++;
+        } break;
+
+    }
+        ///SEGUNDA VERIFICACAO DE COLISAO APOS A MOVIMENTCAO
+        if (a == x && b == y || c == x && d == y || e == x && f == y || g == x && h == y){
+                ganhou=false;
+
+    }
+        ///VERIFICA SE OS INIMIGOS FORAM ATINGIDOS PELO RAIO DA BOMBA
+        verificarExplosao(x, y, a, b, c, d, e, f, g, h, m);
+
+    }
+
+    return 0;
+}

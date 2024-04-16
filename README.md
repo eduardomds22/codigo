@@ -1,2 +1,0 @@
-# codigo
-código de trabalho
