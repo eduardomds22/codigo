@@ -126,7 +126,7 @@ void detonarBomba(int x, int y, int m[21][40],int CaixasDestruidas,int pontuacao
     }
 
     //DIREITA
-    if (y < 34 && m[x][y + 1] != 1) {
+    if (y < 34 && m[x][y + 1] != 1) { // MUDAR RAIO AQUI
         m[x][y + 1] = '*';
         pontuacao=pontuacao+10;
         CaixasDestruidas++;
@@ -139,7 +139,7 @@ void detonarBomba(int x, int y, int m[21][40],int CaixasDestruidas,int pontuacao
 
     //REMOVE A EXPLOSAO
     m[x][y] = 0;
-    if (x > 0 && m[x - 1][y] == '*') {
+    if (x > 0 && m[x - 1][y] == '*') { // MUDAR SEGUNDO RAIO AQUI
         m[x - 1][y] = 0;
     }
     if (x < 20 && m[x + 1][y] == '*') {
@@ -148,11 +148,11 @@ void detonarBomba(int x, int y, int m[21][40],int CaixasDestruidas,int pontuacao
     if (y > 0 && m[x][y - 1] == '*') {
         m[x][y - 1] = 0;
     }
-    if (y < 34 && m[x][y + 1] == '*') {
+    if (y < 34 && m[x][y + 2] == '*') {
         m[x][y + 1] = 0;
     }
 }
-void verificarExplosao(int x, int y, int& a, int& b, int& c, int& d, int& e, int& f, int& g, int& h, int m[21][40],int InimigosAbatidos,int pontuacao) {
+void verificarExplosao(int x, int y, int& a, int& b, int& c, int& d, int& e, int& f, int& g, int& h, int m[21][40],int& InimigosAbatidos,int& pontuacao) {
     //VERIFICA SE O USUARIO FOI EXPLODIDO PELA BOMBA
     if (m[x][y] == '*') {
         cout << "\n - VOCE PERDEU POIS FOI ATINGIDO PELA EXPLOSAO !!!" << endl;
