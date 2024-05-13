@@ -4,87 +4,43 @@
 #include <cstdlib>
 #include <ctime>
 #include <thread> ///BIBLIOTECA UTILIZADA PARA FAZER O FUNCIONAMENTO DO CRONOMETRO DA BOMBA
-//ARRUMAR O ESQUEMA DE PONTUACOES, ALGUNS NAO FUNCIONAM
-/*
-- O Jogo deve estar otimizado (pontuação 0.4)
-- O Jogo não deve piscar ou deslocar blocos sem a que seja da dinâmica do Jogo (pontuação 0.4)
-- Design Caprichado (pontuação 0.4)
-- O Jogo deve ter Menu (pontuação 0.4)
-- Ter opção explicando como funciona o Jogo
-- Ter opção de Dificuldades e explicando os itens
-- Ter opção explicando a pontuação (Cálculo deve ser implementado, levando em consideração,
-movimento, bombas utilizadas, inimigos abatidos, caixas destruídas....)
-- Ter opção mostrando o Rank Ordenado
-- O Jogo deve permitir continuar/reiniciar quando o personagem morrer ou acabar (pontuação 0.4)
-- O Jogo ser salvado em um arquivo (pontuação 0.4)
-Universidade do Vale do Itajaí
-Escola Politécnica
-Curso de Ciência da Computação
-Algoritmos e Programação II (22817)
-- Data, Jogador, Pontuação, Bombas, Movimentos ...
-- O Jogo deve ter ao menos 3 fases (pontuação 0.4)
-- No último nível deve ter 1 inimigo especial que execute movimentos mais inteligentes (pontuação 0.4)
-- Os blocos quebráveis devem ser aleatórios (pontuação 0.4)
-- Deve-se garantir que o jogador tenha espaço para estourar as bombas
-- Deve-se ter um portal para a próxima Fase (pontuação 0.4)
-- O Jogo deve ter 3 dificuldades – Ideia (pontuação 1.0)
-- Fácil movimento 3 inimigos mesmos movimentos do trabalho 1
-- Médio mínimo 5 inimigos, (ideia) com %50 de chance de se mover para o Jogador
-- Difícil mínimo 7 inimigos, (ideia) inimigos devem ter %75 de chance de se mover para o Jogador.
-- Ter informações em Tela (pontuação 0.3)
-- Ter o tempo em Tela
-- Ter a pontuação em Tela, contagem de movimento, contagem da quantidade de bombas usadas
-- Ter itens pegos
-- Inserir itens especiais, que deve ser exibido embaixo das caixas quebradas mínimo estes itens ex: (0.7)
-- Aumento do raio de fogo em 1 (cumulativo)
-- Aumento na quantidade de bombas (cumulativo)
-- Vida Extra (cumulativo)
-- Bomba Relógio
-- Permitir sobreviver a bomba
-- Permitir passar pelos blocos quebráveis
-- A explosão da bomba passará por tantos blocos quebráveis quanto o nível do fogo permitir.
-***Quando passar de fase os bônus restam***
-- O Jogo deve ter a opção de um segundo Jogador (1 Ponto extra na prova da M1)
-- Colocar música no jogo (1 Ponto extra na prova da M1)
-Critérios técnicos (pontuação 4.0)
-- Criar arquivo, manipular: ler, inserir e dados
-- Parâmetro Default e Sobrecarga
-- Struct e Template
-- Recursividade
-*/
 using namespace std;
 
+struct Personagem {
+    int x;
+    int y;
+};
+
+struct Inimigo {
+    int x;
+    int y;
+};
+
 bool bombaExiste = false;
-void imprimirMapa(const int m[21][40], int x, int y,int a,int b,int c,int d,int e,int f,int g,int h, COORD coord,int movimentos,int BombasUtilizadas,int pontuacao,int InimigosAbatidos,int CaixasDestruidas) {
+
+void imprimirMapa(const int m[21][40], Personagem jogador, Inimigo inimigo1, Inimigo inimigo2, Inimigo inimigo3, Inimigo inimigo4, Inimigo inimigo5, Inimigo inimigo6, Inimigo inimigo7, COORD coord) {
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 
         //IMPRIME O MAPA E OS PERSONAGENS
         for(int i=0;i<21;i++){
             for(int j=0;j<40;j++){
-                if (i == x && j == y) {
-                cout<< char(139); //USUARIO
-                }else if ((i == a && j == b) || (i == c && j == d) || (i == e && j == f) || (i == g && j == h)) {
-                cout << char(148); //INIMIGOS
-
-                }else {
-                    switch (m[i][j]){
-                        case 0: cout<<  " ";       break; //CAMINHO
-                        case 1: cout<<  char(219); break;  //PAREDE INSDESTRUTIVEL
-                        case 2: cout<<  char(177); break; //PAREDE DESTRUTIVEL
-                        case 3: cout << char(207); break; //BOMBA
-                        case'*':cout << char(158);       break; //RAIO DE EXPLOSAO DA BOMBA
-
-                    }
+                if (i == jogador.x && j == jogador.y) {
+                cout << char(139); // jogador
+            } else if ((i == inimigo1.x && j == inimigo1.y) || (i == inimigo2.x && j == inimigo2.y) || (i == inimigo3.x && j == inimigo3.y) || (i == inimigo4.x && j == inimigo4.y) || (i == inimigo5.x && j == inimigo5.y) || (i == inimigo6.x && j == inimigo6.y) || (i == inimigo7.x && j == inimigo7.y)) {
+                cout << char(148); // inimigos
+            } else {
+                switch (m[i][j]) {
+                    case 0: cout << " "; break;
+                    case 1: cout << char(219); break;
+                    case 2: cout << char(177); break;
+                    case 3: cout << char(207); break;
+                    case 8: cout << " "; break;
+                    case '*': cout << char(158); break;
                 }
             }
-            cout<<"\n";
         }
-        cout << "Movimentos: " << movimentos << endl;
-        cout << "Bombas Utilizadas: " << BombasUtilizadas << endl;
-        cout << "Inimigos Abatidos: " << InimigosAbatidos << endl;
-        cout << "Caixas Destruidas: " << CaixasDestruidas << endl;
-        cout << "Pontuacao: " << pontuacao << endl;
-
+        cout << "\n";
+    }
 }
 
 bool posicaoOcupadaPelaBomba(int x, int y, int m[21][40]) {
@@ -100,36 +56,28 @@ void colocarBomba(int x, int y, int m[21][40]) {
     }
 }
 
-void detonarBomba(int x, int y, int m[21][40],int CaixasDestruidas,int pontuacao) {
+void detonarBomba(int x, int y, int m[21][40]) {
     //EXPLOSAO NA POSICAO DA BOMBA
     m[x][y] = '*'; //RAIO DA EXPLOSAO
 
     //CIMA
     if (x > 0 && m[x - 1][y] != 1) {
         m[x - 1][y] = '*';
-        pontuacao=pontuacao+10;
-        CaixasDestruidas++;
     }
 
     //BAIXO
     if (x < 20 && m[x + 1][y] != 1) {
         m[x + 1][y] = '*';
-        pontuacao=pontuacao+10;
-        CaixasDestruidas++;
     }
 
     //ESQUERDA
     if (y > 0 && m[x][y - 1] != 1) {
         m[x][y - 1] = '*';
-        pontuacao=pontuacao+10;
-        CaixasDestruidas++;
     }
 
     //DIREITA
-    if (y < 34 && m[x][y + 1] != 1) { // MUDAR RAIO AQUI
+    if (y < 34 && m[x][y + 1] != 1) {
         m[x][y + 1] = '*';
-        pontuacao=pontuacao+10;
-        CaixasDestruidas++;
     }
 
     bombaExiste = false;
@@ -139,7 +87,7 @@ void detonarBomba(int x, int y, int m[21][40],int CaixasDestruidas,int pontuacao
 
     //REMOVE A EXPLOSAO
     m[x][y] = 0;
-    if (x > 0 && m[x - 1][y] == '*') { // MUDAR SEGUNDO RAIO AQUI
+    if (x > 0 && m[x - 1][y] == '*') {
         m[x - 1][y] = 0;
     }
     if (x < 20 && m[x + 1][y] == '*') {
@@ -148,60 +96,148 @@ void detonarBomba(int x, int y, int m[21][40],int CaixasDestruidas,int pontuacao
     if (y > 0 && m[x][y - 1] == '*') {
         m[x][y - 1] = 0;
     }
-    if (y < 34 && m[x][y + 2] == '*') {
+    if (y < 34 && m[x][y + 1] == '*') {
         m[x][y + 1] = 0;
     }
 }
-void verificarExplosao(int x, int y, int& a, int& b, int& c, int& d, int& e, int& f, int& g, int& h, int m[21][40],int& InimigosAbatidos,int& pontuacao) {
-    //VERIFICA SE O USUARIO FOI EXPLODIDO PELA BOMBA
+void verificarExplosao(int x, int y, Inimigo& inimigo1, Inimigo& inimigo2, Inimigo& inimigo3, Inimigo& inimigo4, Inimigo& inimigo5, Inimigo& inimigo6, Inimigo& inimigo7, int m[21][40]) {
     if (m[x][y] == '*') {
         cout << "\n - VOCE PERDEU POIS FOI ATINGIDO PELA EXPLOSAO !!!" << endl;
-        exit(0); //ENCERRA O PROGRAMA
+        exit(0);
     }
 
-    //VERIFICA SE OS INIMIGOS FORAM ATINGIDOS
-    if (m[a][b] == '*') {
-        a = 1;
-        b = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
-        InimigosAbatidos++;
-        pontuacao=pontuacao+100;
+    if (m[inimigo1.x][inimigo1.y] == '*') {
+        inimigo1.x = 1;
+        inimigo1.y = 38;
     }
-    if (m[c][d] == '*') {
-       c = 7;
-       d = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
-       InimigosAbatidos++;
-       pontuacao=pontuacao+100;
+    if (m[inimigo2.x][inimigo2.y] == '*') {
+        inimigo2.x = 3;
+        inimigo2.y = 38;
     }
-    if (m[e][f] == '*') {
-        e = 18;
-        f = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
-        InimigosAbatidos++;
-        pontuacao=pontuacao+100;
+    if (m[inimigo3.x][inimigo3.y] == '*') {
+        inimigo3.x = 5;
+        inimigo3.y = 38;
     }
-    if (m[g][h] == '*') {
-        g = 12;
-        h = 38; //ATUALIZA A POSICAO DO INIMIGO AO SER ATINGIDO
-        InimigosAbatidos++;
-        pontuacao=pontuacao+100;
+    if (m[inimigo4.x][inimigo4.y] == '*') {
+        inimigo4.x = 7;
+        inimigo4.y = 38;
     }
+    if (m[inimigo5.x][inimigo5.y] == '*') {
+        inimigo5.x = 9;
+        inimigo5.y = 38;
+    }
+    if (m[inimigo6.x][inimigo6.y] == '*') {
+        inimigo6.x = 11;
+        inimigo6.y = 38;
+    }
+    if (m[inimigo7.x][inimigo7.y] == '*') {
+        inimigo7.x = 13;
+        inimigo7.y = 38;
+    }
+
 }
-void explosaoAssincrona(int x, int y, int m[21][40],int CaixasDestruidas,int pontuacao) {
+
+void explosaoAssincrona(int x, int y, int m[21][40]) {
     Sleep(3000); // ESPERA 3 SEGUNDOS PARA EXPLODIR
-    detonarBomba(x, y, m,CaixasDestruidas,pontuacao);
+    detonarBomba(x, y, m);
+}
+bool verificarVitoria(Inimigo inimigo1, Inimigo inimigo2, Inimigo inimigo3, Inimigo inimigo4, Inimigo inimigo5, Inimigo inimigo6, Inimigo inimigo7) {
+    return (inimigo1.x == 1 && inimigo1.y == 38 &&
+            inimigo2.x == 3 && inimigo2.y == 38 &&
+            inimigo3.x == 5 && inimigo3.y == 38 &&
+            inimigo4.x == 7 && inimigo4.y == 38 &&
+            inimigo5.x == 9 && inimigo5.y == 38 &&
+            inimigo6.x == 11 && inimigo6.y == 38 &&
+            inimigo7.x == 13 && inimigo7.y == 38);
 }
 
-bool verificarVitoria(int a, int b, int c, int d, int e, int f, int g, int h) { ///VERIFICA SE TODOS OS INIMIGOS FORAM DERROTADOS
-    return (a == 1 && b == 38 && c == 7 && d == 38 && e == 18 && f == 38 && g == 12 && h == 38);
+void geracaoaleatoria (int m[21][40]) {
+
+ double probabilidade = 0.5; //ESCOLHE A PROPABILIDADE DA GERAÇÃO
+
+    //PERCORRE A MATRIZ VERIFICANDO SE OS NUMEROS PODEM VIRAR 2
+    for (int i = 0; i < 21; i++) {
+        for (int j = 0; j < 40; j++) {
+            //VERIFICA SE OO VALOR É 0
+            if (m[i][j] == 0) {
+                //GERA UM NUMERO ALEATORIO
+                double aleatorio = (double)rand() / RAND_MAX;
+
+                //VERIFICA O NUMERO ALEATORIO
+                if (aleatorio < probabilidade) {
+                    m[i][j] = 2; //FAZ A MUDANÇA PARA 2
+                }
+            }
+        }
+    }
+
 }
+Personagem movimentacaoJogador (int m[21][40], Personagem jogador) {
+if (_kbhit()) {
+            char tecla;
+            tecla = getch();
+            switch(tecla) {
+                case 72: case 'w': ///CIMA
+                    if(m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m)) {
+                        jogador.x--;
+                    }
+                    break;
+                case 80: case 's': ///BAIXO
+                    if(m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m)) {
+                        jogador.x++;
+                    }
+                    break;
+                case 75: case 'a': ///ESQUERDA
+                    if (m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m)) {
+                        jogador.y--;
+                    }
+                    break;
+                case 77: case 'd': ///DIREITA
+                    if (m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m)) {
+                        jogador.y++;
+                    }
+                    break;
+                case 32: /// ESPAÇO PARA COLOCACAO DA BOMBA
+                    if (!bombaExiste) {
+                        colocarBomba(jogador.x, jogador.y, m);
+                        bombaExiste = true;
+                        thread t(explosaoAssincrona, jogador.x, jogador.y, m);
+                        t.detach(); // DESANEXA A THREAD
+                    }
+                    break;
+            }
+        }
 
-int main(){
+  return jogador; }
 
-    srand(time(NULL));
-    char tecla1;
-    int num, escolha, dificuldade=30, movimentos=0, BombasUtilizadas=0 /* 10 pontos */ , InimigosAbatidos=0 /* 100 pontos */ , CaixasDestruidas=0 /* 10 pontos */, pontuacao=0;
-    bool back=false, voltar=false, ganhou=true;
-
-    while(back==false){
+Inimigo movimentacaoInimigo(int m[21][40], int dificuldade,Inimigo inimigo){
+    int MovimentoAleatorio1 = rand() % dificuldade + 1;
+        switch(MovimentoAleatorio1) {
+            case 1:
+                if(m[inimigo.x - 1][inimigo.y] != 1 && m[inimigo.x - 1][inimigo.y] != 2 && !posicaoOcupadaPelaBomba(inimigo.x - 1, inimigo.y, m)) {
+                    inimigo.x--;
+                }
+                break;
+            case 2:
+                if(m[inimigo.x + 1][inimigo.y] != 1 && m[inimigo.x + 1][inimigo.y] != 2 && !posicaoOcupadaPelaBomba(inimigo.x + 1, inimigo.y, m)) {
+                    inimigo.x++;
+                }
+                break;
+            case 3:
+                if (m[inimigo.x][inimigo.y - 1] != 1 && m[inimigo.x][inimigo.y - 1] != 2 && !posicaoOcupadaPelaBomba(inimigo.x, inimigo.y - 1, m)) {
+                    inimigo.y--;
+                }
+                break;
+            case 4:
+                if (m[inimigo.x][inimigo.y + 1] != 1 && m[inimigo.x][inimigo.y + 1] != 2 && !posicaoOcupadaPelaBomba(inimigo.x, inimigo.y + 1, m)) {
+                    inimigo.y++;
+                }
+                break;
+        }
+    return inimigo;
+  }
+  void MostrarMenu (int& escolha, int& dificuldade, bool& sair,bool voltar,bool back){
+      while(!back){
         system("cls");
         voltar=false;
         cout << "_" << endl;
@@ -218,7 +254,7 @@ int main(){
 
 
         if(escolha==1){ //INICIA O JOGO
-            back=true;
+            back =true;
         }
         if(escolha==2){ // ESCOLHA DA DIFICULDADE
                 while (voltar==false){
@@ -284,9 +320,27 @@ int main(){
            cout << "____________________________________________________________________  " << endl;
            cout << "      !!!    VOCE ENCERROU O JOGO, ATE UMA PROXIMA VEZ   !!!          " << endl;
            cout << "____________________________________________________________________  " << endl;
-            return 0;
+            sair==true;
+            break;
         }
     }
+
+  }
+
+int main(){
+
+    srand(time(NULL));
+    char tecla1;
+    int num, escolha, fase=1, dificuldade=30;
+    bool back=false, voltar=false, ganhou=false,sair=false;
+    MostrarMenu(escolha, dificuldade, sair,voltar,back);
+    if (!sair){
+        return 0;
+    }
+     if (escolha == 1) {
+        cout << "fdddddddddddddddddddddddddddd" << endl;
+    }
+
 
         //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
         //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
@@ -304,223 +358,273 @@ int main(){
         //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
         //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
 
-int m[21][40] = {   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1},
+int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,0,0,0,0,2,2,0,2,0,2,2,2,0,2,2,0,2,2,2,0,0,0,0,0,0,0,2,2,2,0,0,0,0,1,0,0,1,0,1},
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
 
-                    {1,0,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,2,2,2,0,2,0,0,2,2,2,2,2,2,2,0,0,0,1,0,0,1,1,1},
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,0,2,2,2,0,0,1,2,2,2,0,1,0,0,2,2,1,2,2,2,2,1,0,0,0,0,1,2,0,0,0,0,0,1,0,0,0,0,0},
+                    {1,8,8,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
 
-                    {1,2,2,0,2,0,0,2,0,2,2,2,2,0,0,2,0,0,2,0,0,0,2,0,2,2,2,2,2,0,0,0,0,2,1,0,0,0,0,0},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,2,2,0,2,2,2,2,2,2,0,0,2,0,0,2,0,0,2,0,2,2,2,2,0,0,0,0,0,0,0,2,2,2,1,0,0,0,0,0},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,2,8,8,8,2,8,8,8,1,8,1},
 
-                    {1,0,2,0,0,0,0,2,2,0,0,0,2,2,2,0,2,0,0,0,2,2,2,0,0,2,2,2,0,2,0,0,2,0,1,0,0,1,1,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,2,2,8,8,8,1,1,1},
 
-                    {1,2,0,2,0,0,0,1,2,0,0,0,1,2,2,2,2,1,2,2,2,2,1,2,2,2,2,1,2,2,0,0,2,0,1,0,0,1,0,1},
+                    {1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,2,8,8,8,1,8,1},
 
-                    {1,0,2,2,2,2,2,2,2,0,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0,2,2,2,0,0,0,2,0,1,0,0,1,1,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,8,8,8,8,2,8,8,8,1,1,1},
 
-                    {1,0,0,0,0,2,2,0,2,0,2,2,2,0,0,0,0,0,0,0,0,0,2,0,0,0,0,2,2,2,0,0,2,0,1,0,0,0,0,0},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,2,2,2,2,8,1,8,1},
 
-                    {1,0,0,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,2,0,2,2,2,2,2,2,2,2,0,2,1,0,0,0,0,0},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,0,2,2,2,0,0,1,2,2,2,0,1,2,2,2,2,1,2,2,2,2,1,0,0,0,0,1,2,0,0,0,0,0,1,0,0,1,1,1},
+                    {1,8,8,0,1,0,0,0,0,1,0,0,0,0,1,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
 
-                    {1,2,2,0,2,0,0,2,0,2,2,2,2,0,0,2,0,0,2,0,0,0,2,0,0,2,2,2,2,0,0,0,0,2,1,0,0,1,0,1},
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,2,2,0,2,2,2,2,2,2,0,0,2,0,0,2,0,0,2,0,2,2,2,0,0,0,2,2,0,0,0,2,2,2,1,0,0,1,1,1},
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
 
-                    {1,0,2,0,0,0,0,2,2,0,0,0,2,2,2,0,2,0,0,0,2,2,2,0,0,2,2,2,0,0,0,0,2,0,1,0,0,0,0,0},
+                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,2,0,2,0,0,0,1,2,0,0,0,1,2,2,2,2,1,2,2,2,2,1,2,2,2,2,1,2,2,0,0,2,0,1,0,0,0,0,0},
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
 
-                    {1,0,0,2,2,2,2,0,2,2,0,0,2,0,0,0,2,0,2,0,0,0,0,0,0,2,2,0,0,2,0,0,2,0,1,0,0,0,0,0},
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
 
-                    {1,0,0,0,2,0,0,0,0,2,0,0,2,2,0,2,2,2,2,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,1},
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
 
-                    {1,0,0,0,0,0,2,0,2,2,0,0,2,0,0,2,2,0,0,0,0,0,2,2,2,2,0,0,0,2,0,0,0,0,1,0,0,1,0,1},
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
 
-                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1},};
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},};
+
+
+
+ int m2[21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,2,8,8,8,8,2,8,8,2,8,2,2,2,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,2,8,8,8,8,2,8,8,2,8,8,8,2,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,2,2,2,8,1,1,1},
+
+                    {1,0,0,0,1,0,0,8,1,2,2,2,1,8,0,0,0,1,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,8,8,8,2,8,2,8,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,8,8,2,2,2,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,8,8,8,2,8,0,8,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,8,2,8,2,8,2,8,0,0,0,0,0,0,0,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,0,0,0,1,0,0,0,1,2,2,2,1,0,0,0,0,1,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},};
+
+
+  int m3 [21][40] = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,1,1,1},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,1,1},
+
+                    {1,8,8,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,8,8,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,8,8,8},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,8,8,8},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,8,8,8},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,8,8,8},
+
+                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},};
+
+    geracaoaleatoria(m1);
 
     //POSICAO INICIAL DOS JOGADORES E INIMIGOS
-    int x=1, y=1, a=1, b=33, c=18, d=1, e=18, f=33, g=9, h=17;
+    Personagem jogador = {1, 1};
+    Inimigo inimigo1 = {1, 18};
+    Inimigo inimigo2 = {13, 1};
+    Inimigo inimigo3 = {13, 18};
+    Inimigo inimigo4 = {7, 38};
+    Inimigo inimigo5 = {9, 38};
+    Inimigo inimigo6 = {11 ,38};
+    Inimigo inimigo7 = {13, 38};
 
-    //TECLAS A SEREM PRESSIONADAS
-    char tecla;
-    while(true || ganhou==true){
 
-        imprimirMapa(m, x, y,a,b,c,d,e,f,g,h, coord, movimentos,BombasUtilizadas,pontuacao, InimigosAbatidos, CaixasDestruidas); //IMPRIME O MAPA
+       // TECLAS A SEREM PRESSIONADAS
 
-        if (x == a && y == b || x == c && y == d || x == e && y == f || x == g && y == h) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
-            cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO -" << endl;
-            return 0;
-        }
+    while(!ganhou){ //enquanto o usuario nao ganhou
 
-            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
-            if (!bombaExiste && verificarVitoria(a, b, c, d, e, f, g, h)) {
-                cout << "!!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E VENCEU O JOGO !!!" << endl;
+        if(fase==1){
+            imprimirMapa(m1, jogador, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord); //IMPRIME O MAPA
+
+            //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
+            if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
+                cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO -" << endl;
                 return 0;
             }
 
-        //EXECUTA OS MOVIMENTOS DO USUARIO
-         if (_kbhit()) {
-            tecla = getch();
-            switch(tecla)
-            {
+            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
+            if (verificarVitoria(inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7)) {
+                cout << "!!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E PASSOU PARA O PROXIMO NIVEL!!!" << endl;
+                cout << "APERTE QUALQUER TECLA PARA IR PARA PROXIMA FASE"<< endl;
+                getch();
+                system("cls");
+                jogador =  {1, 1};
+                inimigo1 = {1, 18};
+                inimigo2 = {18, 1};
+                inimigo3 = {18,18};
+                inimigo4 = {9,11};
+                inimigo5 = {9,9};
+                inimigo6 = {11,38};
+                inimigo7 = {13,38};
+                geracaoaleatoria(m2);
+                fase = 2;
 
-                case 72: case 'w': ///CIMA
-                if(m[x - 1][y] != 1 && m[x - 1][y] != 2 && !posicaoOcupadaPelaBomba(x - 1, y, m)) {
-                    x--;
-                    movimentos++;
-                }
-                break;
+            }
 
-                case 80: case 's': ///BAIXO
-                if(m[x + 1][y] != 1 && m[x + 1][y] != 2 && !posicaoOcupadaPelaBomba(x + 1, y, m)) {
-                    x++;
-                    movimentos++;
-                }
-                break;
+            //EXECUTA OS MOVIMENTOS DO USUARIO
+            jogador=movimentacaoJogador(m1, jogador);
 
-                case 75:case 'a': ///ESQUERDA
-                if (m[x][y - 1] != 1 && m[x][y - 1] != 2 && !posicaoOcupadaPelaBomba(x, y - 1, m)) {
-                    y--;
-                    movimentos++;
-                }
-                break;
+            ///MOVIMENTACAO DOS INIMIGOS - IMPEDE COLISAO COM PAREDES E A POSICAO QUE A BOMBA OCUPA ANTES DE SER EXPLODIDA
+            // Movimento dos inimigos
+            inimigo1 = movimentacaoInimigo(m1,dificuldade,inimigo1);
+            inimigo2 = movimentacaoInimigo(m1,dificuldade,inimigo2);
+            inimigo3 = movimentacaoInimigo(m1,dificuldade,inimigo3);
+            inimigo4 = movimentacaoInimigo(m1,dificuldade,inimigo4);
+            inimigo5 = movimentacaoInimigo(m1,dificuldade,inimigo5);
+            inimigo6 = movimentacaoInimigo(m1,dificuldade,inimigo6);
+            inimigo7 = movimentacaoInimigo(m1,dificuldade,inimigo7);
 
-
-                case 77: case 'd': ///DIREITA
-                if (m[x][y + 1] != 1 && m[x][y + 1] != 2 && !posicaoOcupadaPelaBomba(x, y + 1, m)) {
-                    y++;
-                    movimentos++;
-                }
-                break;
-
-                case 32: /// ESPAÇO PARA COLOCACAO DA BOMBA
-                if (!bombaExiste) {
-                    colocarBomba(x, y, m);
-                    bombaExiste = true;
-                    BombasUtilizadas++;
-                    pontuacao= pontuacao+10;
-                    thread t(explosaoAssincrona, x, y, m,CaixasDestruidas,pontuacao);
-                    t.detach(); // DESANEXA A THREND
-                }
-                break;
-          }
+            ///VERIFICA SE OS INIMIGOS OU O JOGADOR FORAM ATINGIDOS PELO RAIO DA BOMBA
+            verificarExplosao(jogador.x, jogador.y, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m1);
         }
+        if(fase==2){
+            imprimirMapa(m2, jogador, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord); //IMPRIME O MAPA
 
-        ///MOVIMENTACAO DOS INIMIGOS - IMPEDE COLISAO COM PAREDES E A POSICAO QUE A BOMBA OCUPA ANTES DE SER EXPLODIDA
-        int MovimentoAleatorio1 = rand() % dificuldade + 1;
-        switch(MovimentoAleatorio1){
+            //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
+            if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
+                cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO -" << endl;
+                return 0;
+            }
 
-        case 1:
-             if(m[a - 1][b] != 1 && m[a - 1][b] != 2 && !posicaoOcupadaPelaBomba(a - 1, b, m)) {
-                a--;
-        } break;
+            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
+            if (verificarVitoria(inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7)) {
+                cout << "!!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E PASSOU PARA O PROXIMO NIVEL!!!" << endl;
+                getch();
+                system("cls");
+            jogador = {1, 1};
+            inimigo1 = {1, 33};
+            inimigo2 = {18, 1};
+            inimigo3 = {18, 33};
+            inimigo4 = {8, 7};
+            inimigo5 = {8, 27};
+            inimigo6 = {5 ,17};
+            inimigo7 = {13, 17};
+                geracaoaleatoria(m3);
+                fase = 3;
+            }
 
-        case 2:
-            if(m[a + 1][b] != 1 && m[a + 1][b] != 2 && !posicaoOcupadaPelaBomba(a + 1, b, m)) {
-                a++;
-        } break;
+            //EXECUTA OS MOVIMENTOS DO USUARIO
+            jogador=movimentacaoJogador(m2, jogador);
 
-        case 3:
-            if (m[a][b - 1] != 1 && m[a][b - 1] != 2&& !posicaoOcupadaPelaBomba(a, b - 1, m)) {
-                b--;
-        } break;
+            ///MOVIMENTACAO DOS INIMIGOS - IMPEDE COLISAO COM PAREDES E A POSICAO QUE A BOMBA OCUPA ANTES DE SER EXPLODIDA
+            // Movimento dos inimigos
+            inimigo1 = movimentacaoInimigo(m2,dificuldade,inimigo1);
+            inimigo2 = movimentacaoInimigo(m2,dificuldade,inimigo2);
+            inimigo3 = movimentacaoInimigo(m2,dificuldade,inimigo3);
+            inimigo4 = movimentacaoInimigo(m2,dificuldade,inimigo4);
+            inimigo5 = movimentacaoInimigo(m2,dificuldade,inimigo5);
+            inimigo6 = movimentacaoInimigo(m2,dificuldade,inimigo6);
+            inimigo7 = movimentacaoInimigo(m2,dificuldade,inimigo7);
 
-        case 4:
-            if (m[a][b + 1] != 1 && m[a][b + 1] != 2 && !posicaoOcupadaPelaBomba(a, b + 1, m)) {
-                b++;
-        } break;
-
+            ///VERIFICA SE OS INIMIGOS OU O JOGADOR FORAM ATINGIDOS PELO RAIO DA BOMBA
+            verificarExplosao(jogador.x, jogador.y, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m2);
         }
-        int MovimentoAleatorio2 = rand() % dificuldade + 1;
-        switch(MovimentoAleatorio2){
+        if(fase==3){
+            imprimirMapa(m3, jogador, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord); //IMPRIME O MAPA
 
-        case 1:
-             if(m[c - 1][d] != 1 && m[c - 1][d] != 2 && !posicaoOcupadaPelaBomba(c - 1, d, m)) {
-                c--;
-        } break;
+            //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
+           if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
+                cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO -" << endl;
+                return 0;
+            }
 
-        case 2:
-            if(m[c + 1][d] != 1 && m[c + 1][d] != 2&& !posicaoOcupadaPelaBomba(c + 1, d, m)) {
-                c++;
-        } break;
+            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
+            if (verificarVitoria(inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7)) {
+                cout << "!!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E VENCEU O JOGO !!!" << endl;
+                ganhou = true;
+            }
 
-        case 3:
-            if (m[c][d - 1] != 1 && m[c][d - 1] != 2 && !posicaoOcupadaPelaBomba(c, d - 1, m)) {
-                d--;
-        } break;
+            //EXECUTA OS MOVIMENTOS DO USUARIO
+            jogador=movimentacaoJogador(m3, jogador);
 
-        case 4:
-            if (m[c][d + 1] != 1 && m[c][d + 1] != 2 && !posicaoOcupadaPelaBomba(c, d + 1, m)) {
-                d++;
-        } break;
+            ///MOVIMENTACAO DOS INIMIGOS - IMPEDE COLISAO COM PAREDES E A POSICAO QUE A BOMBA OCUPA ANTES DE SER EXPLODIDA
+            // Movimento dos inimigos
+            inimigo1 = movimentacaoInimigo(m3,dificuldade,inimigo1);
+            inimigo2 = movimentacaoInimigo(m3,dificuldade,inimigo2);
+            inimigo3 = movimentacaoInimigo(m3,dificuldade,inimigo3);
+            inimigo4 = movimentacaoInimigo(m3,dificuldade,inimigo4);
+            inimigo5 = movimentacaoInimigo(m3,dificuldade,inimigo5);
+            inimigo6 = movimentacaoInimigo(m3,dificuldade,inimigo6);
+            inimigo7 = movimentacaoInimigo(m3,dificuldade,inimigo7);
 
+            ///VERIFICA SE OS INIMIGOS OU O JOGADOR FORAM ATINGIDOS PELO RAIO DA BOMBA
+            verificarExplosao(jogador.x, jogador.y, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m3);
         }
-        int MovimentoAleatorio3 = rand() % dificuldade + 1;
-        switch(MovimentoAleatorio3){
-
-        case 1:
-             if(m[e - 1][f] != 1 && m[e - 1][f] != 2 && !posicaoOcupadaPelaBomba(e - 1, f, m)) {
-                e--;
-        } break;
-
-
-        case 2:
-            if(m[e + 1][f] != 1 && m[e + 1][f] != 2 && !posicaoOcupadaPelaBomba(e + 1, f, m)) {
-                e++;
-        } break;
-
-
-        case 3:
-            if (m[e][f - 1] != 1 && m[e][f - 1] != 2 && !posicaoOcupadaPelaBomba(e, f - 1, m)) {
-                f--;
-        } break;
-
-        case 4:
-            if (m[e][f + 1] != 1 && m[e][f + 1] != 2&& !posicaoOcupadaPelaBomba(e, f + 1, m)) {
-                f++;
-        } break;
-
     }
 
-        int MovimentoAleatorio4 = rand() % dificuldade + 1; //movimentaçao do inimigo
-        switch(MovimentoAleatorio4){
-
-        case 1:
-             if(m[g - 1][h] != 1 && m[g - 1][h] != 2 && !posicaoOcupadaPelaBomba(g - 1, h, m)) {
-                g--;
-        } break;
-
-        case 2:
-            if(m[g + 1][h] != 1 && m[g + 1][h] != 2 && !posicaoOcupadaPelaBomba(g + 1, h, m)) {
-                g++;
-        } break;
-
-        case 3:
-            if (m[g][h - 1] != 1 && m[g][h - 1] != 2  && !posicaoOcupadaPelaBomba(g, h - 1, m)) {
-                h--;
-        } break;
-
-        case 4:
-            if (m[g][h + 1] != 1 && m[g][h + 1] != 2 && !posicaoOcupadaPelaBomba(g, h + 1, m)) {
-                h++;
-        } break;
-
-    }
-        ///SEGUNDA VERIFICACAO DE COLISAO APOS A MOVIMENTCAO
-        if (a == x && b == y || c == x && d == y || e == x && f == y || g == x && h == y){
-                ganhou=false;
-
-    }
-        ///VERIFICA SE OS INIMIGOS FORAM ATINGIDOS PELO RAIO DA BOMBA
-        verificarExplosao(x, y, a, b, c, d, e, f, g, h, m,InimigosAbatidos,pontuacao);
-
-    }
-
-    return 0;
+return 0;
 }
+
+
+
