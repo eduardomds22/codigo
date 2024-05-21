@@ -223,7 +223,7 @@ void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, I
                     case 8: cout << " "; break;             ///AREA DE NASCIMENTO
                     case 9: cout << char(176); break;       ///UPGRADES - POWER UPS
                     case '*': cout << char(158); break;     ///EXPLOSAO DA BOMBA
-                    case 10: cout << char(158); break;     ///EXPLOSAO DA BOMBA
+                    case 10: cout << char(158); break;     ///POWER UP
                     case 11: cout << char(157); break;     ///POWER UP
                     case 12: cout << char(111); break;     ///POWER UP
                     case 13: cout << char(169); break;     ///POWER UP
@@ -249,23 +249,23 @@ void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, I
         }
         cout << "[]";
         if (Upgrades.MaisBomba == true){
-            cout << "| Bombas infinitas        |" << endl;
+            cout << "| Bombas infinitas |" << endl;
         }
         cout << "[]";
         if (Upgrades.SobreviverBomba == true){
-            cout << "| Sobreviver a bombas     |" << endl;
+            cout << "| Sobreviver a bombas |" << endl;
         }
         cout << "[]";
         if (Upgrades.PassarBlocosQuebraveis == true){
-            cout << "| Intangivel a blocos     |" << endl;
+            cout << "| Intangivel a blocos |" << endl;
         }
         cout << "[]";
         if (Upgrades.DestruicaoMaisBlocos == true){
-            cout << "| Destruir mais blocos    |" << endl;
+            cout << "| Destruir mais blocos |" << endl;
         }
         cout << "[]";
         if (Upgrades.Bombarelogio == true){
-            cout << "| Bomba relogio           |" << endl;
+            cout << "| Bomba relogio |" << endl;
         }
 }
 
@@ -571,6 +571,7 @@ void detonarBomba(int x, int y, int m[21][40], Pontuacao& pontos,PowerUps Upgrad
             m[x][y + 2] = '*';
         }
     }
+    }
 
     bombaExiste = false;
     bombaExiste2=false;
@@ -611,7 +612,6 @@ void detonarBomba(int x, int y, int m[21][40], Pontuacao& pontos,PowerUps Upgrad
     if (y < 34 && m[x][y + 2] == '*') {
         m[x][y + 2] = 0;
     }
-}
 }
 
 ///VERIFICA A EXPLOSAO DAS BOMBAS COM E SEM OS POWERUPS
@@ -748,39 +748,129 @@ if (_kbhit()) {
             tecla = getch();
             switch(tecla) {
                case 72: ///CIMA
-                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && m[jogador.x - 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador.x--;
-                    pontos.Movimento++;
-                } else if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && m[jogador.x - 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m)) {
                     jogador.x--;
                     pontos.Movimento++;
                 }
+
+                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x - 1][jogador.y] == 10){
+
+                    Upgrades.PassarBlocosQuebraveis=true;
+
+                }
+                else if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                                   jogador.x--;
+                                   pontos.Movimento++;
+                }
+                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x - 1][jogador.y] == 11){
+
+
+                    Upgrades.AumentoBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x - 1][jogador.y] == 12){
+
+
+                    Upgrades.MaisBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x - 1][jogador.y] == 13){
+
+
+                    Upgrades.SobreviverBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x - 1][jogador.y] == 14){
+
+
+                    Upgrades.DestruicaoMaisBlocos=true;
+                }
                 break;
+
                 case 80: ///BAIXO
-                if (jogador.x < 20 && m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && m[jogador.x + 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m) && !Upgrades.PassarBlocosQuebraveis) {
+                if (jogador.x < 20 && m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && m[jogador.x + 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m)) {
                     jogador.x++;
                     pontos.Movimento++;
-                } else if (jogador.x < 20 && m[jogador.x + 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador.x++;
-                    pontos.Movimento++;
+                }if (jogador.x > 0 && m[jogador.x + 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x + 1][jogador.y] == 10){
+
+                    Upgrades.PassarBlocosQuebraveis=true;
+
+                }else if (jogador.x > 0 && m[jogador.x + 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis == true) {
+                                   jogador.x++;
+                                   pontos.Movimento++;
+                }
+                if (jogador.x > 0 && m[jogador.x + 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x + 1][jogador.y] == 11){
+
+                    Upgrades.AumentoBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x + 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x + 1][jogador.y] == 12){
+
+                    Upgrades.MaisBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x + 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x + 1][jogador.y] == 13){
+
+                    Upgrades.SobreviverBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x + 1][jogador.y] != 1 && jogador.x > 0 && m[jogador.x + 1][jogador.y] == 14){
+
+                    Upgrades.DestruicaoMaisBlocos=true;
                 }
                 break;
                 case 75: ///ESQUERDA
-                if (jogador.y > 0 && m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && m[jogador.x][jogador.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador.y--;
-                    pontos.Movimento++;
-                } else if (jogador.y > 0 && m[jogador.x][jogador.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                if (jogador.y > 0 && m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && m[jogador.x][jogador.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m)) {
                     jogador.y--;
                     pontos.Movimento++;
                 }
+                if (jogador.x > 0 && m[jogador.x][jogador.y - 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y - 1] == 10){
+
+                    Upgrades.PassarBlocosQuebraveis=true;
+                } else if (jogador.x > 0 && m[jogador.x][jogador.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis ==true) {
+                    jogador.y--;
+                    pontos.Movimento++;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y -1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y - 1] == 11){
+
+                    Upgrades.AumentoBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y - 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y - 1] == 12){
+
+                    Upgrades.MaisBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y - 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y - 1] == 13){
+
+                    Upgrades.SobreviverBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y - 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y - 1] == 14){
+
+                    Upgrades.DestruicaoMaisBlocos=true;
+                }
                 break;
                 case 77: ///DIREITA
-                if (jogador.y < 39 && m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && m[jogador.x][jogador.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m) && !Upgrades.PassarBlocosQuebraveis) {
+                if (jogador.y < 39 && m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && m[jogador.x][jogador.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m)) {
                     jogador.y++;
                     pontos.Movimento++;
-                } else if (jogador.y < 39 && m[jogador.x][jogador.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+
+                if (jogador.x > 0 && m[jogador.x][jogador.y + 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y + 1 ] == 10){
+
+                    Upgrades.PassarBlocosQuebraveis=true;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
                     jogador.y++;
                     pontos.Movimento++;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y + 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y + 1] == 11){
+
+                    Upgrades.AumentoBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y + 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y + 1] == 12){
+
+                    Upgrades.MaisBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y + 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y + 1] == 13){
+
+                    Upgrades.SobreviverBomba=true;
+                }
+                if (jogador.x > 0 && m[jogador.x][jogador.y + 1] != 1 && jogador.x > 0 && m[jogador.x][jogador.y + 1] == 14){
+
+                    Upgrades.DestruicaoMaisBlocos=true;
+                }
                 }
                 break;
                 case 13: /// ENTER PARA COLOCACAO DA BOMBA
@@ -940,7 +1030,7 @@ srand(time(NULL));
         ///MAPA FASE 1
 int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,8,8,8,0,0,0,0,0,0,0,9,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
 
                     {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,8,8,1,1,1},
 
@@ -956,9 +1046,9 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,8,8,8,8,2,8,8,8,1,1,1},
 
-                    {1,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,2,2,2,2,8,1,8,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,2,2,2,2,8,1,8,1},
 
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,8,8,1,1,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
                     {1,8,8,0,1,0,0,0,0,1,0,0,0,0,1,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
 
