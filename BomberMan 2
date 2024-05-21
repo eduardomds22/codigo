@@ -532,92 +532,92 @@ if (_kbhit()) {
             char tecla;
             tecla = getch();
             switch(tecla) {
-                case 72: ///CIMA
-                    if(m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m) && Upgrades.PassarBlocosQuebraveis == false) {
-                            jogador.x--;
-                            pontos.Movimento++;
-                    } else if (m[jogador.x - 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis == true){
-                        jogador.x--;
-                        pontos.Movimento++;
-                    }
+               case 72: ///CIMA
+                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && m[jogador.x - 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador.x--;
+                    pontos.Movimento++;
+                } else if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador.x--;
+                    pontos.Movimento++;
+                }
                 break;
                 case 80: ///BAIXO
-                    if(m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m) && Upgrades.PassarBlocosQuebraveis == false) {
-                        jogador.x++;
-                        pontos.Movimento++;
-                    } else if (m[jogador.x + 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis == true){
-                        jogador.x++;
-                        pontos.Movimento++;
-                    }
+                if (jogador.x < 20 && m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && m[jogador.x + 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador.x++;
+                    pontos.Movimento++;
+                } else if (jogador.x < 20 && m[jogador.x + 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador.x++;
+                    pontos.Movimento++;
+                }
                 break;
                 case 75: ///ESQUERDA
-                    if (m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m) && Upgrades.PassarBlocosQuebraveis == false) {
-                        jogador.y--;
-                        pontos.Movimento++;
-                    } else if (m[jogador.x][jogador.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis == true){
-                        jogador.y--;
-                        pontos.Movimento++;
-                    }
+                if (jogador.y > 0 && m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && m[jogador.x][jogador.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador.y--;
+                    pontos.Movimento++;
+                } else if (jogador.y > 0 && m[jogador.x][jogador.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador.y--;
+                    pontos.Movimento++;
+                }
                 break;
                 case 77: ///DIREITA
-                    if (m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m) && Upgrades.PassarBlocosQuebraveis == false) {
-                        jogador.y++;
-                        pontos.Movimento++;
-                    } else if (m[jogador.x][jogador.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis == true){
-                        jogador.y++;
-                        pontos.Movimento++;
-                    }
+                if (jogador.y < 39 && m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && m[jogador.x][jogador.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador.y++;
+                    pontos.Movimento++;
+                } else if (jogador.y < 39 && m[jogador.x][jogador.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador.y++;
+                    pontos.Movimento++;
+                }
                 break;
                 case 13: /// ENTER PARA COLOCACAO DA BOMBA
-                    if (!bombaExiste || Upgrades.MaisBomba == true) {
-                        colocarBomba(jogador.x, jogador.y, m, Upgrades);
-                        bombaExiste = true;
-                        pontos.BombasUsadas++;
-                        pontos.Pontos += 10;
-                        thread t(explosaoAssincrona, jogador.x, jogador.y, m,pontos,Upgrades);
-                        t.detach(); /// DESANEXA A THREAD
-                    }
+                if (!bombaExiste || Upgrades.MaisBomba) {
+                    colocarBomba(jogador.x, jogador.y, m, Upgrades);
+                    bombaExiste = true;
+                    pontos.BombasUsadas++;
+                    pontos.Pontos += 10;
+                    thread t(explosaoAssincrona, jogador.x, jogador.y, m, pontos, Upgrades);
+                    t.detach(); /// DESANEXA A THREAD
+                }
                 break;
 
                 ///MOVIMENTACAO JOGADOR 2
-                case 119: /// W - CIMA
-                    if (coop.de2 && m[jogador2.x - 1][jogador2.y] != 1 && m[jogador2.x - 1][jogador2.y] != 2 && !posicaoOcupadaPelaBomba(jogador2.x - 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
-                            jogador2.x--;
-                            pontos2.Movimento++;
-                    } else if (coop.de2 && m[jogador2.x - 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                        jogador2.x--;
-                        pontos2.Movimento++;
-                    }
+                       case 119: /// W - CIMA
+                if (coop.de2 && jogador2.x > 0 && m[jogador2.x - 1][jogador2.y] != 1 && m[jogador2.x - 1][jogador2.y] != 2 && m[jogador2.x - 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x - 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x--;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.x > 0 && m[jogador2.x - 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x--;
+                    pontos2.Movimento++;
+                }
                 break;
 
                 case 115: /// S - BAIXO
-                    if (coop.de2 && m[jogador2.x + 1][jogador2.y] != 1 && m[jogador2.x + 1][jogador2.y] != 2 && !posicaoOcupadaPelaBomba(jogador2.x + 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
-                            jogador2.x++;
-                            pontos2.Movimento++;
-                    } else if (coop.de2 && m[jogador2.x + 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                        jogador2.x++;
-                        pontos2.Movimento++;
-                    }
+                if (coop.de2 && jogador2.x < 20 && m[jogador2.x + 1][jogador2.y] != 1 && m[jogador2.x + 1][jogador2.y] != 2 && m[jogador2.x + 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x + 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x++;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.x < 20 && m[jogador2.x + 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x++;
+                    pontos2.Movimento++;
+                }
                 break;
 
                 case 97: /// A - ESQUERDA
-                    if (coop.de2 && m[jogador2.x][jogador2.y - 1] != 1 && m[jogador2.x][jogador2.y - 1] != 2 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y - 1, m) && !Upgrades.PassarBlocosQuebraveis) {
-                            jogador2.y--;
-                            pontos2.Movimento++;
-                    } else if (coop.de2 && m[jogador2.x][jogador2.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                        jogador2.y--;
-                        pontos2.Movimento++;
-                    }
+                if (coop.de2 && jogador2.y > 0 && m[jogador2.x][jogador2.y - 1] != 1 && m[jogador2.x][jogador2.y - 1] != 2 && m[jogador2.x][jogador2.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y - 1, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y--;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.y > 0 && m[jogador2.x][jogador2.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y--;
+                    pontos2.Movimento++;
+                }
                 break;
 
-                case 100: /// D - DIREITA para
-                    if (coop.de2 && m[jogador2.x][jogador2.y + 1] != 1 && m[jogador2.x][jogador2.y + 1] != 2 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y + 1, m) && !Upgrades.PassarBlocosQuebraveis) {
-                        jogador2.y++;
-                        pontos2.Movimento++;
-                    } else if (coop.de2 && m[jogador2.x][jogador2.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                        jogador2.y++;
-                        pontos2.Movimento++;
-                    }
+                case 100: /// D - DIREITA
+                if (coop.de2 && jogador2.y < 39 && m[jogador2.x][jogador2.y + 1] != 1 && m[jogador2.x][jogador2.y + 1] != 2 && m[jogador2.x][jogador2.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y + 1, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y++;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.y < 39 && m[jogador2.x][jogador2.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y++;
+                    pontos2.Movimento++;
+                }
                 break;
 
                 case 32: // ESPAÇO PARA USAR A BOMBA PARA O JOGADOR 2
@@ -633,6 +633,7 @@ if (_kbhit()) {
                 }
             }
         }
+
 
 ///MOVIMENTACAO DOS INIMIGOS
 Inimigo movimentacaoInimigo(int m[21][40], int dificuldade,Inimigo inimigo){
@@ -1014,6 +1015,7 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
             ///VERIFICA SE OS INIMIGOS OU O JOGADOR FORAM ATINGIDOS PELO RAIO DA BOMBA
             verificarExplosao(jogador, jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m3,Upgrades,coop, pontos);
-}
-}
+
+        }
+    }
 return 0; }
