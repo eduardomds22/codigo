@@ -1,95 +1,1299 @@
-case 72: /// CIMA
-    if (jogador.x > 0) {
-        if (m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && m[jogador.x - 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m)) {
-            jogador.x--;
-            pontos.Movimento++;
-        } else if (m[jogador.x - 1][jogador.y] == 10) {
-            Upgrades.PassarBlocosQuebraveis = true;
-        } else if (m[jogador.x - 1][jogador.y] == 11) {
-            Upgrades.AumentoBomba = true;
-        } else if (m[jogador.x - 1][jogador.y] == 12) {
-            Upgrades.MaisBomba = true;
-        } else if (m[jogador.x - 1][jogador.y] == 13) {
-            Upgrades.SobreviverBomba = true;
-        } else if (m[jogador.x - 1][jogador.y] == 14) {
-            Upgrades.DestruicaoMaisBlocos = true;
+#include <iostream>
+#include <windows.h>
+#include <conio.h>
+#include <cstdlib>
+#include <ctime>
+#include <thread> ///BIBLIOTECA UTILIZADA PARA FAZER O FUNCIONAMENTO DO CRONOMETRO DA BOMBA
+#include <locale.h>
+using namespace std;
+
+struct Pontuacao {
+    int Movimento=0;         /// MOVIMENTAÇÃO DO USUARIO
+    int BombasUsadas=0;      /// BOMBAS UTILIZADAS - 10 PONTOS POR BOMBA
+    int InimigosAbatidos=0;  /// INIMIGOS ABATIDOS - 100 PONTOS
+    int CaixasDestruidas=0;  /// CAIXAS QUE FORAM DESTRUIDAS - 10 PONTOS CADA
+    int Pontos=0;            /// PONTUAÇÃO
+};
+
+bool colisao_jogador1 = false;          ///COLISAO DOS PLAYERS NO MULTIPLAYER
+bool colisao_jogador2 = false;          ///COLISAO DOS PLAYERS NO MULTIPLAYER
+bool atingido= false;                   ///VERIFICA SE FORAM ANTINGIDOS PELAS BOMBAS
+bool atingido2= false;                  ///VERIFICA SE FORAM ANTINGIDOS PELAS BOMBAS
+bool jogador1PodePerderVidas = false;   ///GERENCIA AS VIDAS DO USUARIO
+bool jogador2PodePerderVidas = false;   ///GERENCIA AS VIDAS DO USUARIO
+
+struct PowerUps {
+    bool AumentoBomba=false;                ///FAZ O RAIO DA BOMBA AUMENTAR
+    bool MaisBomba=false;                   ///ADICIONA UMA QUANTIDADE ILIMITADA DE BOMBAS
+    int Jogador1Vidas = 1;                  ///GERENCIAMENTO DE VIDAS DOS USUARIOS
+    int Jogador2Vidas = 1;                  ///GERENCIAMENTO DE VIDAS DOS USUARIOS
+    bool SobreviverBomba = false;           ///VERIFICAÇÃO SE O USUARIO SOBREVIVE A BOMBAS
+    bool PassarBlocosQuebraveis = false;    ///PASSA PELOS BLOCOS QUEBRAVEIS
+    int DestruicaoMaisBlocos = false;       ///DESTROI MAIS BLOCOS EM AREA
+    int Bombarelogio = false;               ///BOMBA RELOGIO
+};
+
+
+struct Multiplayer { ///FUNCIONAMENTO DO MODO MULTIPLAYER
+    bool de2=false;
+};
+struct Personagem { ///DECLARA O PERSONAGEM DO USUARIO
+    int x;
+    int y;
+};
+
+
+struct Inimigo { ///DECLARA OS INIMIGOS
+    int x;
+    int y;
+};
+
+
+bool bombaExiste = false; ///CONFERE AS BOMBAS JA COLOCADAS
+bool bombaExiste2= false; ///CONFERE AS BOMBAS JA COLOCADAS NO MULTIPLAYER
+
+
+void Menudificuldade(int& dificuldade) { ///MENU DE DIFICULDADE DO JOGO
+    bool voltar = false;
+    int escolha;
+
+    while (voltar==false){
+                    cout << "__________________________________________________________________________  \n " << endl; // ESCOLHER O TEMPO DE MOVIMENTO DOS INIMIGOS DO JOGO
+                    cout << "                       |SELECIONE A DIFICULDADE| \n                            " << endl;
+                    cout << "                1 - FACIL - MOVIMNTACAO FICA MAIS LENTA                        " << endl;
+                    cout << "                2 - MEDIO - MOVIMENTACAO FICA MEDIANA                          " << endl;
+                    cout << "                3 - DIFICIL - MOVIMENTACAO FICA MAIS RAPIDA                    " << endl;
+                    cout << "                    DIGITE [0] PARA RETORNAR AO MENU\n                         " << endl;
+                    cout << "___________________________________________________________________________    " << endl;
+                    cin >> escolha;
+                    system("cls");
+
+
+                    if(escolha == 1){
+                        dificuldade=20;
+                        cout << "_______________________________________________________________  " << endl;
+                        cout << " * DIFICULDADE ALTERADA - VOCE SELECIONOU A DIFICULDADE FACIL *  " << endl;
+                        cout << "_______________________________________________________________  " << endl;
+                        Sleep(2000);
+                        system("cls");
+                    }
+                    if(escolha == 2){
+                        dificuldade=30;
+                        cout << "_______________________________________________________________  " << endl;
+                        cout << " DIFICULDADE ALTERADA - VOCE SELECIONOU A DIFICULDADE MEDIA    " << endl;
+                        cout << "_______________________________________________________________  " << endl;
+                        Sleep(2000);
+                        system("cls");
+                    }
+                    if(escolha == 3){
+                        dificuldade=60;
+                        cout << "_______________________________________________________________  " << endl;
+                        cout << " DIFICULDADE ALTERADA - VOCE SELECIONOU A DIFICULDADE DIFICIL  " << endl;
+                        cout << "_______________________________________________________________  " << endl;
+                        Sleep(2000);
+                        system("cls");
+                    }
+                    if(escolha == 0){
+                        voltar=true;
+                    }
+                }
         }
 
-        if (Upgrades.PassarBlocosQuebraveis && m[jogador.x - 1][jogador.y] != 1) {
-            jogador.x--;
-            pontos.Movimento++;
+    void MenuPrincipal(Multiplayer& coop) { ///MENU PRINCIPAL
+    srand(time(NULL));
+    char tecla1;
+    int escolha, fase = 1, dificuldade = 30;
+    bool back = false;
+
+    while (!back) {
+        system("cls");
+        cout << "____________________________________________________________________        \n " << endl;
+        cout << "                    * BEM VINDO AO BOMBERMAN *                                 " << endl;
+        cout << "                       |* MENU DE OPCOES *|                                  \n" << endl;
+        cout << "                     1 - INICIAR O JOGO                                        " << endl;
+        cout << "                     2 - ESCOLHA DA DIFICULDADE                                " << endl;
+        if (coop.de2 == false){
+        cout << "                     3 - ATIVAR MODO MULTIJOGADOR                              " << endl;
+        }else if (coop.de2 == true){
+        cout << "                     3 - DESATIVAR MODO MULTIJOGADOR                           " << endl;
+        }
+        cout << "                     4 - EXPLICACAO PONTUACAO                                  " << endl;
+        cout << "                     5 - RANK DAS PONTUACOES                                   " << endl;
+        cout << "                     6 - CRIADORES                                             " << endl;
+        cout << "                     7 - TUTORIAL E REGRAS DO JOGO                             " << endl;
+        cout << "                     8 - SAIR DO JOGO                                          " << endl;
+        cout << "_____________________________________________________________________         \n " << endl;
+        cin >> escolha;
+        system("cls");
+
+        switch (escolha) {
+            case 1:
+                back = true;
+                break;
+
+            case 2:
+
+                 Menudificuldade(dificuldade); ///CHAMADA DO MENU DE DIFICULDADE
+                 break;
+
+            case 3:
+                if (coop.de2== false){
+                    coop.de2=true;
+                }else if (coop.de2 == true){
+                    coop.de2=false;
+                }
+                    break;
+
+            case 4:
+                cout << "_____________________________________________________________________  \n " << endl;
+                cout << "                         |* PONTUACAO *| \n                               " << endl;
+                cout << " - CADA ACAO REALIZADA NO JOGO E CONTABILIZADA EMBAIXO DO SEU MAPA -      " << endl;
+                cout << "          | CADA SIGLA REPRESENTA UMA PONTUACAO NO MAPA |                 " << endl;
+                cout << "    - A CADA MOVIMENTO E ADICIONADO 1 PONTO NA SUA PONTUACAO DE MF -      " << endl;
+                cout << "       - CADA INIMIGO ABATIDO CONTABILIZA 100 PONTOS EM - IN.A -          " << endl;
+                cout << "       - A CADA CAIXA DESTRUIDA VOCE CONTABILIZA 10 PONTOS EM CX -        " << endl;
+                cout << " - A SUA PONTUACAO TOTAL SERA CONTABILIZADA EM PJ - PONTUACAO TOTAL -     " << endl;
+                cout << "_____________________________________________________________________  \n " << endl;
+                system("pause");
+                break;
+
+            case 5:
+                cout << "RANKING" << endl;
+                system("pause");
+                break;
+
+            case 6:
+                cout << "_______________________________________________________________  " << endl;
+                cout << "               * INFORMACAO SOBRE OS CRIADORES * \n              " << endl;
+                cout << "                CAIO CARDOSO  -  EDUARDOS MENDES \n              " << endl;
+                cout << "                   ALGORITMOS E PROGRAMACAO II \n                " << endl;
+                cout << "                    PROFESSOR - ALEX RESE  \n                    " << endl;
+                cout << "_______________________________________________________________  " << endl;
+                system("pause");
+                break;
+
+
+            case 7:
+                cout << "____________________________________________________________________  " << endl;
+                cout << "                   * REGRAS DO JOGO E TUTORIAL * \n                   " << endl;
+                cout << "     O JOGADOR DEVE USAR AS SEGUINTES TECLAS PARA SE MOVIMENTAR :     " << endl;
+                cout << "                 SINGLEPLAYER -  SETAS INDICATICAS                    " << endl;
+                cout << "   MULTIPLAYER -  A = DIREITA, S = BAIXO, D = ESQUERDA, W = CIMA  \n  " << endl;
+                cout << "       O JOGADOR DEVE APERTAR A TECLA ENTER PARA SOLTAR A BOMBA\n     " << endl;
+                cout << "   - O JOGADOR GANHA AO PRENDER OS INIMIGOS QUANDO SAO EXPLODIDOS -   " << endl;
+                cout << "   -  O JOGADOR NAO PODE SER ATINGIDO PELA BOMBA E NEM SE COLIDIR -   " << endl;
+                cout << "____________________________________________________________________  " << endl;
+                system("pause");
+                break;
+
+            case 8:
+                cout << "____________________________________________________________________  " << endl;
+                cout << "      !!!    VOCE ENCERROU O JOGO, ATE UMA PROXIMA VEZ   !!!          " << endl;
+                cout << "____________________________________________________________________  " << endl;
+                return;
+            default:
+                cout << "- ESCOLHA INVALIDA -" << endl;
+                break;
+        }
+
+    }
+    }
+
+
+void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, Inimigo inimigo1, Inimigo inimigo2, Inimigo inimigo3, Inimigo inimigo4, Inimigo inimigo5, Inimigo inimigo6, Inimigo inimigo7, COORD coord, Multiplayer coop,Pontuacao& pontos,Pontuacao& pontos2,PowerUps& Upgrades) {
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+
+        //IMPRIME O MAPA E OS PERSONAGENS
+        for(int i=0;i<21;i++){
+            for(int j=0;j<40;j++){
+                if (i == jogador.x && j == jogador.y) {
+                cout << char(139); ///JOGADOR1
+            }else if (i == jogador2.x && j == jogador2.y){
+                cout << char(129); ///JOGADOR2
+            }else if ((i == inimigo1.x && j == inimigo1.y) || (i == inimigo2.x && j == inimigo2.y) || (i == inimigo3.x && j == inimigo3.y) || (i == inimigo4.x && j == inimigo4.y) || (i == inimigo5.x && j == inimigo5.y) || (i == inimigo6.x && j == inimigo6.y)) {
+                cout << char(148); ///INIMIGOS
+            }else if (i == inimigo7.x && j == inimigo7.y) {
+            cout << char(153); ///INIMIGO BOOS
+            } else {
+                switch (m[i][j]) {
+                    case 0: cout << " "; break;             ///BLOCO VAZIO
+                    case 1: cout << char(219); break;       ///BLOCO INDESTRUTIVEL
+                    case 2: cout << char(177); break;       ///BLOCO DESTRUTIVEL
+                    case 3: cout << char(207); break;       ///BOMBA
+                    case 8: cout << " "; break;             ///AREA DE NASCIMENTO
+                    case 9: cout << char(176); break;       ///UPGRADES - POWER UPS
+                    case '*': cout << char(158); break;     ///EXPLOSAO DA BOMBA
+                    case 10: cout << char(169); break;     ///POWER UP
+                    case 11: cout << char(169); break;     ///POWER UP
+                    case 12: cout << char(169); break;     ///POWER UP
+                    case 13: cout << char(169); break;     ///POWER UP
+                    case 14: cout << char(169); break;     ///POWER UP
+                    case 15: cout << char(169); break;     ///POWER UP
+
+                }
+            }
+        }
+        cout << "\n";
+    }
+        cout << "_____________________________________________________________________ " << endl;
+        cout << "TIME: "  << " SEGS" << endl; ///TEMPO EXIBIDO EM TELA
+        cout << "|PJ1 : " << pontos.Pontos << " | MF -  " << pontos.Movimento << " | BU - " << pontos.BombasUsadas << " | IN.A -  " << pontos.InimigosAbatidos << " | CX: " << pontos.CaixasDestruidas << " |" << endl;
+        cout << "\n" << endl; ///PONTUACAO DO JOGADOR 1
+        if (coop.de2 == true){
+        cout << "|PJ2 : "  << pontos2.Pontos << " | MF2 - " << pontos2.Movimento << " | BU2 -  " << pontos2.BombasUsadas << " | IN.A2  - " << pontos2.InimigosAbatidos << " | CX2: " << pontos2.CaixasDestruidas << " |" << endl;
+        } /// PONTUACAO DO JOGADOR 2
+        cout << "_____________________________________________________________________ " << endl;
+        cout << "[]";
+        if (Upgrades.AumentoBomba == true){
+            cout << "| Raio da bomba aumentado |" << endl;
+        }
+        cout << "[]";
+        if (Upgrades.MaisBomba == true){
+            cout << "| Bombas infinitas |" << endl;
+        }
+        cout << "[]";
+        if (Upgrades.SobreviverBomba == true){
+            cout << "| Sobreviver a bombas |" << endl;
+        }
+        cout << "[]";
+        if (Upgrades.PassarBlocosQuebraveis == true){
+            cout << "| Intangivel a blocos |" << endl;
+        }
+        cout << "[]";
+        if (Upgrades.DestruicaoMaisBlocos == true){
+            cout << "| Destruir mais blocos |" << endl;
+        }
+        cout << "[]";
+        if (Upgrades.Bombarelogio == true){
+            cout << "| Bomba relogio |" << endl;
+        }
+}
+
+bool posicaoOcupadaPelaBomba(int x, int y, int m[21][40]) {
+    return (m[x][y] == 3); //CARACTER QUE REPRESENTA A BOMBA
+
+}
+
+void colocarBomba2(int x, int y, int m[21][40], PowerUps Upgrades) { ///COLOCACAO DA BOMBA NO MULTIPLAYER
+    if (!bombaExiste2 || Upgrades.MaisBomba == true) {
+        m[x][y] = 3;
+        bombaExiste2 = true;
+        }
+}
+
+void colocarBomba(int x, int y, int m[21][40], PowerUps Upgrades) { ///COLOCACAO DA BOMBA
+    if (!bombaExiste || Upgrades.MaisBomba == true) {
+        m[x][y] = 3;
+        bombaExiste = true;
+        }
+}
+
+void detonarBomba(int x, int y, int m[21][40], Pontuacao& pontos,PowerUps Upgrades) {
+    //EXPLOSAO NA POSICAO DA BOMBA
+    m[x][y] = '*'; //RAIO DA EXPLOSAO
+    //CIMA
+        if (x > 0 && m[x - 1][y] != 1) {
+        if (x > 0 && m[x - 1][y] ==2){
+            srand(std::time(0));
+            int broco=0;
+            broco = rand() % 20 + 1;
+            switch (broco){
+            case 1:
+                m[x - 1][y] = 10;
+            break;
+            case 2:
+                m[x - 1][y] = 11;
+            break;
+            case 3:
+                m[x - 1][y] = 12;
+            break;
+            case 4:
+                m[x - 1][y] = 13;
+            break;
+            case 5:
+                m[x - 1][y] = 14;
+            break;
+            case 6:
+                m[x - 1][y] = 15;
+            break;
+            default:
+                m[x - 1][y] = '*';
+            break;
+            }
+        }
+        if (x > 0 && m[x - 1][y] == 0 || x > 0 && m[x - 1][y] == 8){
+            m[x - 1][y] = '*';
+        }
+
+    }
+    // BAIXO
+    if (x < 20 && m[x + 1][y] != 1) {
+        if (x > 0 && m[x + 1][y] ==2) {
+            srand(std::time(0));
+            int broco1=0;
+            broco1 = rand() % 20 + 1;
+            switch (broco1){
+            case 1:
+                m[x + 1][y] = 10;
+            break;
+            case 2:
+                m[x + 1][y] = 11;
+            break;
+            case 3:
+                m[x + 1][y] = 12;
+            break;
+            case 4:
+                m[x + 1][y] = 13;
+            break;
+            case 5:
+                m[x + 1][y] = 14;
+            break;
+            case 6:
+                m[x + 1][y] = 15;
+            break;
+            default:
+                m[x + 1][y] = '*';
+            break;
+            }
+        }
+     if (x > 0 && m[x + 1][y] == 0 || x > 0 && m[x + 1][y] == 8){
+            m[x + 1][y] = '*';
         }
     }
-    break;
 
-case 80: /// BAIXO
-    if (jogador.x < 19) { // Considerando que o índice máximo é 19 para uma matriz 20xN
-        if (m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && m[jogador.x + 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m)) {
-            jogador.x++;
-            pontos.Movimento++;
-        } else if (m[jogador.x + 1][jogador.y] == 10) {
-            Upgrades.PassarBlocosQuebraveis = true;
-        } else if (m[jogador.x + 1][jogador.y] == 11) {
-            Upgrades.AumentoBomba = true;
-        } else if (m[jogador.x + 1][jogador.y] == 12) {
-            Upgrades.MaisBomba = true;
-        } else if (m[jogador.x + 1][jogador.y] == 13) {
-            Upgrades.SobreviverBomba = true;
-        } else if (m[jogador.x + 1][jogador.y] == 14) {
-            Upgrades.DestruicaoMaisBlocos = true;
+    // ESQUERDA
+    if (y > 0 && m[x][y - 1] != 1) {
+            if (x > 0 && m[x][y - 1] ==2){
+            srand(std::time(0));
+            int broco2=0;
+            broco2 = rand() % 20 + 1;
+            switch (broco2){
+            case 1:
+                m[x][y - 1] = 10;
+            break;
+            case 2:
+                m[x][y - 1] = 11;
+            break;
+            case 3:
+                m[x][y - 1] = 12;
+            break;
+            case 4:
+                m[x][y - 1] = 13;
+            break;
+            case 5:
+                m[x][y - 1] = 14;
+            break;
+            case 6:
+                m[x][y - 1] = 15;
+            break;
+            default:
+                m[x][y - 1] = '*';
+            break;
+            }
         }
-
-        if (Upgrades.PassarBlocosQuebraveis && m[jogador.x + 1][jogador.y] != 1) {
-            jogador.x++;
-            pontos.Movimento++;
-        }
-    }
-    break;
-
-case 75: /// ESQUERDA
-    if (jogador.y > 0) {
-        if (m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && m[jogador.x][jogador.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m)) {
-            jogador.y--;
-            pontos.Movimento++;
-        } else if (m[jogador.x][jogador.y - 1] == 10) {
-            Upgrades.PassarBlocosQuebraveis = true;
-        } else if (m[jogador.x][jogador.y - 1] == 11) {
-            Upgrades.AumentoBomba = true;
-        } else if (m[jogador.x][jogador.y - 1] == 12) {
-            Upgrades.MaisBomba = true;
-        } else if (m[jogador.x][jogador.y - 1] == 13) {
-            Upgrades.SobreviverBomba = true;
-        } else if (m[jogador.x][jogador.y - 1] == 14) {
-            Upgrades.DestruicaoMaisBlocos = true;
-        }
-
-        if (Upgrades.PassarBlocosQuebraveis && m[jogador.x][jogador.y - 1] != 1) {
-            jogador.y--;
-            pontos.Movimento++;
+        if (x > 0 && m[x][y - 1] == 0 || x > 0 && m[x][y - 1] == 8){
+            m[x][y - 1] = '*';
         }
     }
-    break;
 
-case 77: /// DIREITA
-    if (jogador.y < 38) { // Considerando que o índice máximo é 38 para uma matriz Nx40
-        if (m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && m[jogador.x][jogador.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m)) {
-            jogador.y++;
-            pontos.Movimento++;
-        } else if (m[jogador.x][jogador.y + 1] == 10) {
-            Upgrades.PassarBlocosQuebraveis = true;
-        } else if (m[jogador.x][jogador.y + 1] == 11) {
-            Upgrades.AumentoBomba = true;
-        } else if (m[jogador.x][jogador.y + 1] == 12) {
-            Upgrades.MaisBomba = true;
-        } else if (m[jogador.x][jogador.y + 1] == 13) {
-            Upgrades.SobreviverBomba = true;
-        } else if (m[jogador.x][jogador.y + 1] == 14) {
-            Upgrades.DestruicaoMaisBlocos = true;
+    // DIREITA
+    if (y < 39 && m[x][y + 1] != 1) {
+        if (x > 0 && m[x][y + 1] ==2){
+            srand(std::time(0));
+            int broco3=0;
+            broco3 = rand() % 20 + 1;
+            switch (broco3){
+            case 1:
+                m[x][y + 1] = 10;
+            break;
+            case 2:
+                m[x][y + 1] = 11;
+            break;
+            case 3:
+                m[x][y + 1] = 12;
+            break;
+            case 4:
+                m[x][y + 1] = 13;
+            break;
+            case 5:
+                m[x][y + 1] = 14;
+            break;
+            case 6:
+                m[x][y + 1] = 15;
+            break;
+            default:
+                m[x][y + 1] = '*';
+            break;
+            }
         }
-
-        if (Upgrades.PassarBlocosQuebraveis && m[jogador.x][jogador.y + 1] != 1) {
-            jogador.y++;
-            pontos.Movimento++;
+        if (x > 0 && m[x][y + 1] == 0 || x > 0 || m[x][y + 1] == 8){
+            m[x][y + 1] = '*';
         }
     }
-    break;
+    if(Upgrades.AumentoBomba == true){
+        //CIMA
+        if (x > 1 && m[x - 2][y] != 1) {
+                if (x > 0 && m[x - 1][y] ==2){
+            srand(std::time(0));
+            int broco=0;
+            broco = rand() % 20 + 1;
+            switch (broco){
+            case 1:
+                m[x - 2][y] = 10;
+            break;
+            case 2:
+                m[x - 2][y] = 11;
+            break;
+            case 3:
+                m[x - 2][y] = 12;
+            break;
+            case 4:
+                m[x - 2][y] = 13;
+            break;
+            case 5:
+                m[x - 2][y] = 14;
+            break;
+            case 6:
+                m[x - 2][y] = 15;
+            break;
+            default:
+                m[x - 2][y] = '*';
+            break;
+            }
+        }
+        if (x > 0 && m[x - 2][y] == 0 || x > 0 && m[x - 2][y] == 8){
+            m[x - 2][y] = '*';
+        }
+
+    }
+
+        // BAIXO
+        if (x < 19 && m[x + 2][y] != 1) {
+            if (x > 0 && m[x + 2][y] ==2) {
+            srand(std::time(0));
+            int broco1=0;
+            broco1 = rand() % 20 + 1;
+            switch (broco1){
+            case 1:
+                m[x + 2][y] = 10;
+            break;
+            case 2:
+                m[x + 2][y] = 11;
+            break;
+            case 3:
+                m[x + 2][y] = 12;
+            break;
+            case 4:
+                m[x + 2][y] = 13;
+            break;
+            case 5:
+                m[x + 2][y] = 14;
+            break;
+            case 6:
+                m[x + 2][y] = 15;
+            break;
+            default:
+                m[x + 2][y] = '*';
+            break;
+            }
+        }
+        if (x > 0 && m[x + 2][y] == 0 || x > 0 && m[x + 2][y] == 8){
+            m[x + 2][y] = '*';
+        }
+    }
+
+        // ESQUERDA
+        if (y > 1 && m[x][y - 2] != 1) {
+             if (x > 0 && m[x][y - 2] ==2){
+            srand(std::time(0));
+            int broco2=0;
+            broco2 = rand() % 20 + 1;
+            switch (broco2){
+            case 1:
+                m[x][y - 2] = 10;
+            break;
+            case 2:
+                m[x][y - 2] = 11;
+            break;
+            case 3:
+                m[x][y - 2] = 12;
+            break;
+            case 4:
+                m[x][y - 2] = 13;
+            break;
+            case 5:
+                m[x][y - 2] = 14;
+            break;
+            case 6:
+                m[x][y - 2] = 15;
+            break;
+            default:
+                m[x][y - 2] = '*';
+            break;
+            }
+        }
+        if (x > 0 && m[x][y - 2] == 0 || x > 0 && m[x][y - 2] == 8){
+            m[x][y - 2] = '*';
+        }
+    }
+
+        // DIREITA
+        if (y < 38 && m[x][y + 2] != 1) {
+            if (x > 0 && m[x][y + 2] ==2){
+            srand(std::time(0));
+            int broco3=0;
+            broco3 = rand() % 20 + 1;
+            switch (broco3){
+            case 1:
+                m[x][y + 2] = 10;
+            break;
+            case 2:
+                m[x][y + 2] = 11;
+            break;
+            case 3:
+                m[x][y + 2] = 12;
+            break;
+            case 4:
+                m[x][y + 2] = 13;
+            break;
+            case 5:
+                m[x][y + 2] = 14;
+            break;
+            case 6:
+                m[x][y + 2] = 15;
+            break;
+            default:
+                m[x][y + 2] = '*';
+            break;
+            }
+        }
+        if (x > 0 && m[x][y + 2] == 0 || x > 0 && m[x][y + 2] == 8){
+            m[x][y + 2] = '*';
+        }
+    }
+    }
+
+    bombaExiste = false;
+    bombaExiste2=false;
+
+    //ESPERA 1 SEGUNDO PARA A EXPLOSAO SER REMOVIDA
+    jogador1PodePerderVidas = true;
+    jogador2PodePerderVidas = true;
+    Sleep(1000);
+    jogador1PodePerderVidas = false;
+    jogador2PodePerderVidas = false;
+
+    //REMOVE A EXPLOSAO
+    m[x][y] = 0;
+    if (x > 0 && m[x - 1][y] == '*') {
+        m[x - 1][y] = 0;
+    }
+    if (x < 20 && m[x + 1][y] == '*') {
+        m[x + 1][y] = 0;
+    }
+    if (y > 0 && m[x][y - 1] == '*') {
+        m[x][y - 1] = 0;
+    }
+    if (y < 34 && m[x][y + 1] == '*') {
+        m[x][y + 1] = 0;
+    }
+
+
+
+    if (x > 0 && m[x - 2][y] == '*') {
+        m[x - 2][y] = 0;
+    }
+    if (x < 20 && m[x + 2][y] == '*') {
+        m[x + 2][y] = 0;
+    }
+    if (y > 0 && m[x][y - 2] == '*') {
+        m[x][y - 2] = 0;
+    }
+    if (y < 34 && m[x][y + 2] == '*') {
+        m[x][y + 2] = 0;
+    }
+}
+
+///VERIFICA A EXPLOSAO DAS BOMBAS COM E SEM OS POWERUPS
+void verificarExplosao(Personagem& jogador, Personagem& jogador2, Inimigo& inimigo1, Inimigo& inimigo2, Inimigo& inimigo3, Inimigo& inimigo4, Inimigo& inimigo5, Inimigo& inimigo6, Inimigo& inimigo7, int m[21][40],PowerUps& Upgrades,Multiplayer& coop, Pontuacao& pontos) {
+    if(Upgrades.SobreviverBomba == false){
+        if (m[jogador.x][jogador.y] == '*' && coop.de2 == false){
+            if(jogador1PodePerderVidas){
+                Upgrades.Jogador1Vidas--;
+                jogador1PodePerderVidas = false;
+            }
+            if(Upgrades.Jogador1Vidas==0){ //SE MORREU
+                system("cls");
+                cout << "\n - VOCE PERDEU POIS FOI ATINGIDO PELA EXPLOSAO - APERTE EM QUALQUER TECLA PARA ENCERRAR O JOGO -" << endl;
+                getch();
+                exit(0);
+            }
+        }
+        if (coop.de2 == true){
+            if (m[jogador.x][jogador.y] == '*' ){
+                if(jogador1PodePerderVidas){
+                    Upgrades.Jogador1Vidas--;
+                    jogador1PodePerderVidas = false;
+            }
+                if(Upgrades.Jogador1Vidas==0){
+                    jogador={15, 38};
+                    atingido=true;
+                }
+            }
+            if (m[jogador2.x][jogador2.y] == '*' ){
+                if(jogador2PodePerderVidas){
+                    Upgrades.Jogador2Vidas--;
+                    jogador2PodePerderVidas = false;
+            }
+                if(Upgrades.Jogador2Vidas == 0){
+                    jogador2={17, 38};
+                    atingido2=true;
+                }
+            }
+        }
+        if (Upgrades.Jogador1Vidas < 1 && Upgrades.Jogador2Vidas < 1){
+            cout << "\n - VOCE PERDEU POIS FOI ATINGIDO PELA EXPLOSAO - APERTE EM QUALQUER TECLA PARA ENCERRAR O JOGO -" << endl;
+            getch();
+            exit(0);
+        }
+    }
+    if (m[inimigo1.x][inimigo1.y] == '*') {
+        inimigo1.x = 1;
+        inimigo1.y = 38;
+        pontos.InimigosAbatidos+=1;
+        pontos.Pontos+=100;
+    }
+    if (m[inimigo2.x][inimigo2.y] == '*') {
+        inimigo2.x = 3;
+        inimigo2.y = 38;
+        pontos.InimigosAbatidos+=1;
+        pontos.Pontos+=100;
+    }
+    if (m[inimigo3.x][inimigo3.y] == '*') {
+        inimigo3.x = 5;
+        inimigo3.y = 38;
+        pontos.InimigosAbatidos+=1;
+        pontos.Pontos+=100;
+    }
+    if (m[inimigo4.x][inimigo4.y] == '*') {
+        inimigo4.x = 7;
+        inimigo4.y = 38;
+        pontos.InimigosAbatidos+=1;
+        pontos.Pontos+=100;
+    }
+    if (m[inimigo5.x][inimigo5.y] == '*') {
+        inimigo5.x = 9;
+        inimigo5.y = 38;
+        pontos.InimigosAbatidos+=1;
+        pontos.Pontos+=100;
+    }
+    if (m[inimigo6.x][inimigo6.y] == '*') {
+        inimigo6.x = 11;
+        inimigo6.y = 38;
+        pontos.InimigosAbatidos+=1;
+        pontos.Pontos+=100;
+    }
+    if (m[inimigo7.x][inimigo7.y] == '*') {
+        inimigo7.x = 13;
+        inimigo7.y = 38;
+        pontos.InimigosAbatidos+=1;
+        pontos.Pontos+=100;
+    }
+
+}
+
+void explosaoAssincrona(int x, int y, int m[21][40],Pontuacao pontos,PowerUps Upgrades) {
+    Sleep(3000); // ESPERA 3 SEGUNDOS PARA EXPLODIR
+    detonarBomba(x, y, m,pontos,Upgrades);
+}
+
+///VERIFICA AS CONDICOES DE VITORIA
+bool verificarVitoria(Inimigo inimigo1, Inimigo inimigo2, Inimigo inimigo3, Inimigo inimigo4, Inimigo inimigo5, Inimigo inimigo6, Inimigo inimigo7) {
+    return (inimigo1.x == 1 && inimigo1.y == 38 &&
+            inimigo2.x == 3 && inimigo2.y == 38 &&
+            inimigo3.x == 5 && inimigo3.y == 38 &&
+            inimigo4.x == 7 && inimigo4.y == 38 &&
+            inimigo5.x == 9 && inimigo5.y == 38 &&
+            inimigo6.x == 11 && inimigo6.y == 38 &&
+            inimigo7.x == 13 && inimigo7.y == 38);
+}
+
+///FAZ A GERACAO ALEATORIA DOS BLOCOS EM 0
+void geracaoaleatoria (int m[21][40]) {
+
+ double probabilidade = 0.5; //ESCOLHE A PROPABILIDADE DA GERAÇÃO
+
+    //PERCORRE A MATRIZ VERIFICANDO SE OS NUMEROS PODEM VIRAR 2
+    for (int i = 0; i < 21; i++) {
+        for (int j = 0; j < 40; j++) {
+            //VERIFICA SE OO VALOR É 0
+            if (m[i][j] == 0) {
+                //GERA UM NUMERO ALEATORIO
+                double aleatorio = (double)rand() / RAND_MAX;
+
+                //VERIFICA O NUMERO ALEATORIO
+                if (aleatorio < probabilidade) {
+                    m[i][j] = 2; //FAZ A MUDANÇA PARA 2
+                }
+            }
+        }
+    }
+
+}
+
+///MOVIMENTACAO DO JOGADOR
+Personagem movimentacaoJogador (int m[21][40], Personagem& jogador,Personagem& jogador2, PowerUps& Upgrades,Multiplayer& coop, Pontuacao& pontos, Pontuacao& pontos2) {
+if (_kbhit()) {
+            char tecla;
+            tecla = getch();
+            switch(tecla) {
+            case 72: /// CIMA
+                if (jogador.x > 0) {
+                    if (m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && m[jogador.x - 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m)) {
+                        jogador.x--;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x - 1][jogador.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x - 1][jogador.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x - 1][jogador.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x - 1][jogador.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x - 1][jogador.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+
+                    if (Upgrades.PassarBlocosQuebraveis && m[jogador.x - 1][jogador.y] != 1) {
+                        jogador.x--;
+                        pontos.Movimento++;
+                    }
+                }
+                break;
+
+            case 80: /// BAIXO
+                if (jogador.x < 19) { // Considerando que o índice máximo é 19 para uma matriz 20xN
+                    if (m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && m[jogador.x + 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m)) {
+                        jogador.x++;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x + 1][jogador.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x + 1][jogador.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x + 1][jogador.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x + 1][jogador.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x + 1][jogador.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+
+                    if (Upgrades.PassarBlocosQuebraveis && m[jogador.x + 1][jogador.y] != 1) {
+                        jogador.x++;
+                        pontos.Movimento++;
+                    }
+                }
+                break;
+
+            case 75: /// ESQUERDA
+                if (jogador.y > 0) {
+                    if (m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && m[jogador.x][jogador.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m)) {
+                        jogador.y--;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x][jogador.y - 1] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x][jogador.y - 1] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x][jogador.y - 1] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x][jogador.y - 1] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x][jogador.y - 1] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+
+                    if (Upgrades.PassarBlocosQuebraveis && m[jogador.x][jogador.y - 1] != 1) {
+                        jogador.y--;
+                        pontos.Movimento++;
+                    }
+                }
+                break;
+
+            case 77: /// DIREITA
+                if (jogador.y < 38) { // Considerando que o índice máximo é 38 para uma matriz Nx40
+                    if (m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && m[jogador.x][jogador.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m)) {
+                        jogador.y++;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x][jogador.y + 1] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x][jogador.y + 1] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x][jogador.y + 1] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x][jogador.y + 1] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x][jogador.y + 1] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+
+                    if (Upgrades.PassarBlocosQuebraveis && m[jogador.x][jogador.y + 1] != 1) {
+                        jogador.y++;
+                        pontos.Movimento++;
+                    }
+                }
+                break;
+                case 13: /// ENTER PARA COLOCACAO DA BOMBA
+                if (!bombaExiste || Upgrades.MaisBomba) {
+                    colocarBomba(jogador.x, jogador.y, m, Upgrades);
+                    bombaExiste = true;
+                    pontos.BombasUsadas++;
+                    pontos.Pontos += 10;
+                    thread t(explosaoAssincrona, jogador.x, jogador.y, m, pontos, Upgrades);
+                    t.detach(); /// DESANEXA A THREAD
+                }
+                break;
+
+                ///MOVIMENTACAO JOGADOR 2
+                       case 119: /// W - CIMA
+                if (coop.de2 && jogador2.x > 0 && m[jogador2.x - 1][jogador2.y] != 1 && m[jogador2.x - 1][jogador2.y] != 2 && m[jogador2.x - 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x - 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x--;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.x > 0 && m[jogador2.x - 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x--;
+                    pontos2.Movimento++;
+                }
+                break;
+
+                case 115: /// S - BAIXO
+                if (coop.de2 && jogador2.x < 20 && m[jogador2.x + 1][jogador2.y] != 1 && m[jogador2.x + 1][jogador2.y] != 2 && m[jogador2.x + 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x + 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x++;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.x < 20 && m[jogador2.x + 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.x++;
+                    pontos2.Movimento++;
+                }
+                break;
+
+                case 97: /// A - ESQUERDA
+                if (coop.de2 && jogador2.y > 0 && m[jogador2.x][jogador2.y - 1] != 1 && m[jogador2.x][jogador2.y - 1] != 2 && m[jogador2.x][jogador2.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y - 1, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y--;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.y > 0 && m[jogador2.x][jogador2.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y--;
+                    pontos2.Movimento++;
+                }
+                break;
+
+                case 100: /// D - DIREITA
+                if (coop.de2 && jogador2.y < 39 && m[jogador2.x][jogador2.y + 1] != 1 && m[jogador2.x][jogador2.y + 1] != 2 && m[jogador2.x][jogador2.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y + 1, m) && !Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y++;
+                    pontos2.Movimento++;
+                } else if (coop.de2 && jogador2.y < 39 && m[jogador2.x][jogador2.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
+                    jogador2.y++;
+                    pontos2.Movimento++;
+                }
+                break;
+
+                case 32: // ESPAÇO PARA USAR A BOMBA PARA O JOGADOR 2
+                    if (coop.de2 && (!bombaExiste2 || Upgrades.MaisBomba)) {
+                        colocarBomba2(jogador2.x, jogador2.y, m, Upgrades);
+                        bombaExiste2 = true;
+                        pontos2.BombasUsadas++;
+                        pontos2.Pontos += 10;
+                        thread t(explosaoAssincrona, jogador2.x, jogador2.y, m, pontos, Upgrades);
+                        t.detach(); // DESANEXA A THREAD
+                    }
+                break;
+                }
+            }
+        }
+
+
+///MOVIMENTACAO DOS INIMIGOS
+Inimigo movimentacaoInimigo(int m[21][40], int dificuldade,Inimigo inimigo){
+    int MovimentoAleatorio1 = rand() % dificuldade + 1;
+        switch(MovimentoAleatorio1) {
+            case 1:
+                if(m[inimigo.x - 1][inimigo.y] != 1 && m[inimigo.x - 1][inimigo.y] != 2 && !posicaoOcupadaPelaBomba(inimigo.x - 1, inimigo.y, m)) {
+                    inimigo.x--;
+                }
+                break;
+            case 2:
+                if(m[inimigo.x + 1][inimigo.y] != 1 && m[inimigo.x + 1][inimigo.y] != 2 && !posicaoOcupadaPelaBomba(inimigo.x + 1, inimigo.y, m)) {
+                    inimigo.x++;
+                }
+                break;
+            case 3:
+                if (m[inimigo.x][inimigo.y - 1] != 1 && m[inimigo.x][inimigo.y - 1] != 2 && !posicaoOcupadaPelaBomba(inimigo.x, inimigo.y - 1, m)) {
+                    inimigo.y--;
+                }
+                break;
+            case 4:
+                if (m[inimigo.x][inimigo.y + 1] != 1 && m[inimigo.x][inimigo.y + 1] != 2 && !posicaoOcupadaPelaBomba(inimigo.x, inimigo.y + 1, m)) {
+                    inimigo.y++;
+                }
+                break;
+        }
+    return inimigo;
+  }
+
+///MOVIMENTACAO DO BOOS
+Inimigo movimentacaoInimigo7(int m[21][40], int dificuldade,Inimigo inimigo){
+    int MovimentoAleatorio7 = rand() % dificuldade + 1;
+        switch(MovimentoAleatorio7) {
+            case 1:
+                if(m[inimigo.x - 1][inimigo.y] != 1 && m[inimigo.x - 1][inimigo.y]  && !posicaoOcupadaPelaBomba(inimigo.x - 1, inimigo.y, m)) {
+                    inimigo.x--;
+                }
+                break;
+            case 2:
+                if(m[inimigo.x + 1][inimigo.y] != 1 && m[inimigo.x + 1][inimigo.y]  && !posicaoOcupadaPelaBomba(inimigo.x + 1, inimigo.y, m)) {
+                    inimigo.x++;
+                }
+                break;
+            case 3:
+                if (m[inimigo.x][inimigo.y - 1] != 1 && m[inimigo.x][inimigo.y - 1]  && !posicaoOcupadaPelaBomba(inimigo.x, inimigo.y - 1, m)) {
+                    inimigo.y--;
+                }
+                break;
+            case 4:
+                if (m[inimigo.x][inimigo.y + 1] != 1 && m[inimigo.x][inimigo.y + 1]  && !posicaoOcupadaPelaBomba(inimigo.x, inimigo.y + 1, m)) {
+                    inimigo.y++;
+                }
+                break;
+        }
+    return inimigo;
+  }
+
+
+
+int main() {
+srand(time(NULL));
+    char tecla1;
+    int num, escolha, fase=1, dificuldade=99;
+    bool back=false, voltar=false, ganhou=false;
+    PowerUps Upgrades;
+    Multiplayer coop;
+    Pontuacao pontos;
+    Pontuacao pontos2;
+    MenuPrincipal(coop);
+
+
+
+        //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
+        //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+        HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_CURSOR_INFO     cursorInfo;
+        GetConsoleCursorInfo(out, &cursorInfo);
+        cursorInfo.bVisible = false; // set the cursor visibilite
+        SetConsoleCursorInfo(out, &cursorInfo);
+        //FIM: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+        //INICIO: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+        short int CX=0, CY=0;
+        COORD coord;
+        coord.X = CX;
+        coord.Y = CY;
+        //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+        //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
+
+        ///MAPA FASE 1
+int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,2,8,8,8,2,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,2,2,8,8,8,1,1,1},
+
+                    {1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,2,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,8,8,8,8,2,8,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,2,2,2,2,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,0,1,0,0,0,0,1,0,0,0,0,1,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},};
+
+
+    ///MAPA FASE 2
+ int m2[21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,2,8,8,8,8,2,8,8,2,8,2,2,2,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,2,8,8,8,8,2,8,8,2,8,8,8,2,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,2,2,2,8,1,1,1},
+
+                    {1,0,0,0,1,0,0,8,1,2,2,2,1,8,0,0,0,1,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,8,8,8,2,8,2,8,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,8,8,2,2,2,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,8,8,8,2,8,0,8,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,8,2,8,2,8,2,8,0,0,0,0,0,0,0,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,0,0,0,1,0,0,0,1,2,2,2,1,0,0,0,0,1,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+
+                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},};
+
+    ///MAPA FASE 3
+  int m3 [21][40] = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,1,1,1},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,1,1},
+
+                    {1,8,8,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,8,8,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,1,1},
+
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,8,1},
+
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,1,1,1},
+
+                    {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8},
+
+                    {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8},};
+
+    ///GERA O MAPA
+    geracaoaleatoria(m1);
+
+    //POSICAO INICIAL DOS JOGADORES E INIMIGOS
+
+    Personagem jogador = {1, 1};
+    Personagem jogador2={15, 38};
+    if (coop.de2) {
+        jogador2 = {1, 2};
+    }
+
+    Inimigo inimigo1 = {1, 18};
+    Inimigo inimigo2 = {13, 1};
+    Inimigo inimigo3 = {13, 18};
+    Inimigo inimigo4 = {7, 38};
+    Inimigo inimigo5 = {9, 38};
+    Inimigo inimigo6 = {11 ,38};
+    Inimigo inimigo7 = {13, 38};
+
+       // TECLAS A SEREM PRESSIONADAS
+
+    while(!ganhou){
+
+        if(fase==1){
+            imprimirMapa(m1, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades); //IMPRIME O MAPA
+            //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
+            if (coop.de2 == false){
+                if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { // Verifica a colisão dos inimigos com o usuário
+                    system("cls");
+                    cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO APERTE EM QUALQUER TECLA PARA ENCERRAR O JOGO -" << endl;
+                    getch();
+                    exit(0);
+                }
+            }
+            if (coop.de2 == true){
+                if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { // Verifica a colisão dos inimigos com o usuáriojogador.x == jogador2.x && jogador.y == jogador2.y
+                    jogador= {17, 38};
+                    colisao_jogador1=true;
+                }
+                if (jogador2.x == inimigo1.x && jogador2.y == inimigo1.y || jogador2.x == inimigo2.x && jogador2.y == inimigo2.y || jogador2.x == inimigo3.x && jogador2.y == inimigo3.y || jogador2.x == inimigo4.x && jogador2.y == inimigo4.y || jogador2.x == inimigo5.x && jogador2.y == inimigo5.y || jogador2.x == inimigo6.x && jogador2.y == inimigo6.y || jogador2.x == inimigo7.x && jogador2.y == inimigo7.y) { // Verifica a colisão dos inimigos com o usuáriojogador2.x == jogador.x && jogador2.y == jogador.y  ARRUMAR ISSO, JOGADOR 2 MATA O JOGADOR 1 AO ENCOSTAR
+                    jogador2= {15, 38};
+                    colisao_jogador2=true;
+                }
+            }
+            if (colisao_jogador1 == true && colisao_jogador2 == true){
+                system("cls");
+                cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO APERTE EM QUALQUER TECLA PARA VOLTAR AO MENU -" << endl;
+                getch();
+                exit(0);
+            }
+
+            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
+            if (verificarVitoria(inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7)) {
+                system("cls");
+                cout << "!!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E PASSOU PARA O PROXIMO NIVEL !!!" << endl;
+                cout << "  -            APERTE QUALQUER TECLA PARA IR PARA PROXIMA FASE             -  "<< endl;
+                getch();
+                system("cls");
+                jogador =  {1, 1};
+                inimigo1 = {1, 18};
+                inimigo2 = {18, 1};
+                inimigo3 = {18,18};
+                inimigo4 = {9,11};
+                inimigo5 = {9,9};
+                inimigo6 = {11,38};
+                inimigo7 = {13,38};
+                geracaoaleatoria(m2);
+                fase = 2;
+
+            }
+
+            //EXECUTA OS MOVIMENTOS DO USUARIO
+            movimentacaoJogador(m1, jogador,jogador2,Upgrades,coop, pontos, pontos2);
+            ///MOVIMENTACAO DOS INIMIGOS - IMPEDE COLISAO COM PAREDES E A POSICAO QUE A BOMBA OCUPA ANTES DE SER EXPLODIDA
+            // Movimento dos inimigos
+            inimigo1 = movimentacaoInimigo(m1,dificuldade,inimigo1);
+            inimigo2 = movimentacaoInimigo(m1,dificuldade,inimigo2);
+            inimigo3 = movimentacaoInimigo(m1,dificuldade,inimigo3);
+            inimigo4 = movimentacaoInimigo(m1,dificuldade,inimigo4);
+            inimigo5 = movimentacaoInimigo(m1,dificuldade,inimigo5);
+            inimigo6 = movimentacaoInimigo(m1,dificuldade,inimigo6);
+            inimigo7 = movimentacaoInimigo7(m1,dificuldade,inimigo7);
+
+            ///VERIFICA SE OS INIMIGOS OU O JOGADOR FORAM ATINGIDOS PELO RAIO DA BOMBA
+            verificarExplosao(jogador, jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m1,Upgrades,coop, pontos);
+        }
+        if(fase==2){
+            imprimirMapa(m2, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades); //IMPRIME O MAPA
+
+            //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
+            if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
+                cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO APERTE EM QUALQUER TECLA PARA ENCERRAR O JOGO -" << endl;
+               exit(0);
+            }
+
+            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
+            if (verificarVitoria(inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7)) {
+                system("cls");
+                cout << "!!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E PASSOU PARA O PROXIMO NIVEL!!!" << endl;
+                cout << "  -            APERTE QUALQUER TECLA PARA IR PARA PROXIMA FASE             -  "<< endl;
+                getch();
+                system("cls");
+            jogador = {1, 1};
+            inimigo1 = {1, 33};
+            inimigo2 = {18, 1};
+            inimigo3 = {18, 33};
+            inimigo4 = {8, 7};
+            inimigo5 = {8, 27};
+            inimigo6 = {5 ,17};
+            inimigo7 = {13, 17};
+                geracaoaleatoria(m3);
+                fase = 3;
+            }
+
+            //EXECUTA OS MOVIMENTOS DO USUARIO
+            movimentacaoJogador(m2, jogador,jogador2, Upgrades,coop, pontos, pontos2);
+
+            ///MOVIMENTACAO DOS INIMIGOS E BOOS
+            inimigo1 = movimentacaoInimigo(m2,dificuldade,inimigo1);
+            inimigo2 = movimentacaoInimigo(m2,dificuldade,inimigo2);
+            inimigo3 = movimentacaoInimigo(m2,dificuldade,inimigo3);
+            inimigo4 = movimentacaoInimigo(m2,dificuldade,inimigo4);
+            inimigo5 = movimentacaoInimigo(m2,dificuldade,inimigo5);
+            inimigo6 = movimentacaoInimigo(m2,dificuldade,inimigo6);
+            inimigo7 = movimentacaoInimigo7(m2,dificuldade,inimigo7);
+
+            ///VERIFICA SE OS INIMIGOS OU O JOGADOR FORAM ATINGIDOS PELO RAIO DA BOMBA
+            verificarExplosao(jogador, jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m2,Upgrades,coop, pontos);
+        }
+        if(fase==3){
+            imprimirMapa(m3, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades); //IMPRIME O MAPA
+
+            //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
+           if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y && Upgrades.Jogador1Vidas == 0) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
+                system("cls");
+             cout << "- VOCE PERDEU POIS FOI ATINGIDO POR UM INIMIGO APERTE EM QUALQUER TECLA PARA ENCERRAR O JOGO -" << endl;
+                exit(0);
+            }else if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y && Upgrades.Jogador1Vidas > 0) {
+                Upgrades.Jogador1Vidas-=1;
+            }
+
+            //VERIFICACAO DE VITORIA EM CASO DE EXPLOSAO DOS INIMIGOS
+            if (verificarVitoria(inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7)) {
+                cout << "  !!! PARABENS, VOCE EXPLODIU TODOS OS INIMIGO E VENCEU O JOGO !!!    " << endl;
+                cout << "- APERTE QUALQUER TECLA PARA ENCERRAR O JOGO E SALVAR SUA PONTUAÇÃO - "<< endl;
+                ganhou = true;
+            }
+
+            //EXECUTA OS MOVIMENTOS DO USUARIO
+            movimentacaoJogador(m3, jogador,jogador2, Upgrades,coop, pontos, pontos2);
+
+            ///MOVIMENTACAO DOS INIMIGOS - IMPEDE COLISAO COM PAREDES E A POSICAO QUE A BOMBA OCUPA ANTES DE SER EXPLODIDA
+            // Movimento dos inimigos
+            inimigo1 = movimentacaoInimigo(m3,dificuldade,inimigo1);
+            inimigo2 = movimentacaoInimigo(m3,dificuldade,inimigo2);
+            inimigo3 = movimentacaoInimigo(m3,dificuldade,inimigo3);
+            inimigo4 = movimentacaoInimigo(m3,dificuldade,inimigo4);
+            inimigo5 = movimentacaoInimigo(m3,dificuldade,inimigo5);
+            inimigo6 = movimentacaoInimigo(m3,dificuldade,inimigo6);
+            inimigo7 = movimentacaoInimigo7(m3,dificuldade,inimigo7);
+
+            ///VERIFICA SE OS INIMIGOS OU O JOGADOR FORAM ATINGIDOS PELO RAIO DA BOMBA
+            verificarExplosao(jogador, jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m3,Upgrades,coop, pontos);
+
+        }
+    }
+return 0; }
