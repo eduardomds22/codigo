@@ -5,6 +5,9 @@
 #include <ctime>
 #include <thread> ///BIBLIOTECA UTILIZADA PARA FAZER O FUNCIONAMENTO DO CRONOMETRO DA BOMBA
 #include <locale.h>
+#include <MMsystem.h>
+
+
 using namespace std;
 
 struct Pontuacao {
@@ -223,43 +226,43 @@ void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, I
                     case 8: cout << " "; break;             ///AREA DE NASCIMENTO
                     case 9: cout << char(176); break;       ///UPGRADES - POWER UPS
                     case '*': cout << char(158); break;     ///EXPLOSAO DA BOMBA
+                    case 10: cout << char(101); break;     ///POWER UP
+                    case 11: cout << char(102); break;     ///POWER UP
+                    case 12: cout << char(103); break;     ///POWER UP
+                    case 13: cout << char(104); break;     ///POWER UP
+                    case 14: cout << " "; break;     ///POWER UP
+                    case 15: cout << " "; break;     ///POWER UP
+
                 }
             }
         }
         cout << "\n";
     }
         cout << "_____________________________________________________________________ " << endl;
-        cout << "TIME: "  << " SEGS" << endl; ///TEMPO EXIBIDO EM TELA
         cout << "|PJ1 : " << pontos.Pontos << " | MF -  " << pontos.Movimento << " | BU - " << pontos.BombasUsadas << " | IN.A -  " << pontos.InimigosAbatidos << " | CX: " << pontos.CaixasDestruidas << " |" << endl;
         cout << "\n" << endl; ///PONTUACAO DO JOGADOR 1
         if (coop.de2 == true){
         cout << "|PJ2 : "  << pontos2.Pontos << " | MF2 - " << pontos2.Movimento << " | BU2 -  " << pontos2.BombasUsadas << " | IN.A2  - " << pontos2.InimigosAbatidos << " | CX2: " << pontos2.CaixasDestruidas << " |" << endl;
         } /// PONTUACAO DO JOGADOR 2
         cout << "_____________________________________________________________________ " << endl;
-        cout << "[]";
+        cout << " ";
         if (Upgrades.AumentoBomba == true){
-            cout << "| Raio da bomba aumentado |" << endl;
+            cout << " | DESTRUIR MAIS BLOCOS - AUMENTO DO RAIO | " << endl;
         }
-        cout << "[]";
+        cout << " ";
         if (Upgrades.MaisBomba == true){
-            cout << "| Bombas infinitas        |" << endl;
+            cout << " | BOMBAS ILIMITADAS | " << endl;
         }
-        cout << "[]";
+        cout << " ";
         if (Upgrades.SobreviverBomba == true){
-            cout << "| Sobreviver a bombas     |" << endl;
+            cout << " | SOBREVIVENCIA AUMENTADA | " << endl;
         }
-        cout << "[]";
+        cout << " ";
         if (Upgrades.PassarBlocosQuebraveis == true){
-            cout << "| Intangivel a blocos     |" << endl;
+            cout << " |  ATRAVESSAR BLOCOS  | " << endl;
         }
-        cout << "[]";
-        if (Upgrades.DestruicaoMaisBlocos == true){
-            cout << "| Destruir mais blocos    |" << endl;
-        }
-        cout << "[]";
-        if (Upgrades.Bombarelogio == true){
-            cout << "| Bomba relogio           |" << endl;
-        }
+
+
 }
 
 bool posicaoOcupadaPelaBomba(int x, int y, int m[21][40]) {
@@ -285,77 +288,285 @@ void detonarBomba(int x, int y, int m[21][40], Pontuacao& pontos,PowerUps Upgrad
     //EXPLOSAO NA POSICAO DA BOMBA
     m[x][y] = '*'; //RAIO DA EXPLOSAO
     //CIMA
-    if (x > 0 && m[x - 1][y] != 1) {
-        if (m[x - 1][y] == 2) {
-            pontos.CaixasDestruidas++; //////////////////////////////ARRUMAR AQUI
-            pontos.Pontos += 10;
+        if (x > 0 && m[x - 1][y] != 1) {
+        if (x > 0 && m[x - 1][y] ==2){
+            srand(std::time(0));
+            int broco=0;
+            broco = rand() % 20 + 1;
+            switch (broco){
+            case 1:
+                m[x - 1][y] = 10;
+            break;
+            case 2:
+                m[x - 1][y] = 11;
+            break;
+            case 3:
+                m[x - 1][y] = 12;
+            break;
+            case 4:
+                m[x - 1][y] = 13;
+            break;
+            case 5:
+                m[x - 1][y] = 14;
+            break;
+            case 6:
+                m[x - 1][y] = 15;
+            break;
+            default:
+                m[x - 1][y] = '*';
+            break;
+            }
+        }
+        if (x > 0 && m[x - 1][y] == 0 || x > 0 && m[x - 1][y] == 8){
             m[x - 1][y] = '*';
         }
-        m[x - 1][y] = '*';
-    }
 
+    }
     // BAIXO
     if (x < 20 && m[x + 1][y] != 1) {
-        if (m[x + 1][y] == 2) {
-            pontos.CaixasDestruidas++;
-            pontos.Pontos += 10;
+        if (x > 0 && m[x + 1][y] ==2) {
+            srand(std::time(0));
+            int broco1=0;
+            broco1 = rand() % 20 + 1;
+            switch (broco1){
+            case 1:
+                m[x + 1][y] = 10;
+            break;
+            case 2:
+                m[x + 1][y] = 11;
+            break;
+            case 3:
+                m[x + 1][y] = 12;
+            break;
+            case 4:
+                m[x + 1][y] = 13;
+            break;
+            case 5:
+                m[x + 1][y] = 14;
+            break;
+            case 6:
+                m[x + 1][y] = 15;
+            break;
+            default:
+                m[x + 1][y] = '*';
+            break;
+            }
         }
-        m[x + 1][y] = '*';
+     if (x > 0 && m[x + 1][y] == 0 || x > 0 && m[x + 1][y] == 8){
+            m[x + 1][y] = '*';
+        }
     }
 
     // ESQUERDA
     if (y > 0 && m[x][y - 1] != 1) {
-        if (m[x][y - 1] == 2) {
-            pontos.CaixasDestruidas++;
-            pontos.Pontos += 10;
+            if (x > 0 && m[x][y - 1] ==2){
+            srand(std::time(0));
+            int broco2=0;
+            broco2 = rand() % 20 + 1 ;
+            switch (broco2){
+            case 1:
+                m[x][y - 1] = 10;
+            break;
+            case 2:
+                m[x][y - 1] = 11;
+            break;
+            case 3:
+                m[x][y - 1] = 12;
+            break;
+            case 4:
+                m[x][y - 1] = 13;
+            break;
+            case 5:
+                m[x][y - 1] = 14;
+            break;
+            case 6:
+                m[x][y - 1] = 15;
+            break;
+            default:
+                m[x][y - 1] = '*';
+            break;
+            }
         }
-        m[x][y - 1] = '*';
+        if (x > 0 && m[x][y - 1] == 0 || x > 0 && m[x][y - 1] == 8){
+            m[x][y - 1] = '*';
+        }
     }
 
     // DIREITA
     if (y < 39 && m[x][y + 1] != 1) {
-        if (m[x][y + 1] == 2) {
-            pontos.CaixasDestruidas++;
-            pontos.Pontos += 10;
+        if (x > 0 && m[x][y + 1] ==2){
+            srand(std::time(0));
+            int broco3=0;
+            broco3 = rand() % 20 + 1;
+            switch (broco3){
+            case 1:
+                m[x][y + 1] = 10;
+            break;
+            case 2:
+                m[x][y + 1] = 11;
+            break;
+            case 3:
+                m[x][y + 1] = 12;
+            break;
+            case 4:
+                m[x][y + 1] = 13;
+            break;
+            case 5:
+                m[x][y + 1] = 14;
+            break;
+            case 6:
+                m[x][y + 1] = 15;
+            break;
+            default:
+                m[x][y + 1] = '*';
+            break;
+            }
         }
-        m[x][y + 1] = '*';
+        if (x > 0 && m[x][y + 1] == 0 || x > 0 || m[x][y + 1] == 8){
+            m[x][y + 1] = '*';
+        }
     }
     if(Upgrades.AumentoBomba == true){
         //CIMA
         if (x > 1 && m[x - 2][y] != 1) {
-            if (m[x - 2][y] == 2) {
-                pontos.CaixasDestruidas++; //////////////////////////////ARRUMAR AQUI
-                pontos.Pontos += 10;
+                if (x > 0 && m[x - 1][y] ==2){
+            srand(std::time(0));
+            int broco=0;
+            broco = rand() % 20 + 1;
+            switch (broco){
+            case 1:
+                m[x - 2][y] = 10;
+            break;
+            case 2:
+                m[x - 2][y] = 11;
+            break;
+            case 3:
+                m[x - 2][y] = 12;
+            break;
+            case 4:
+                m[x - 2][y] = 13;
+            break;
+            case 5:
+                m[x - 2][y] = 14;
+            break;
+            case 6:
+                m[x - 2][y] = 15;
+            break;
+            default:
+                m[x - 2][y] = '*';
+            break;
             }
+        }
+        if (x > 0 && m[x - 2][y] == 0 || x > 0 && m[x - 2][y] == 8){
             m[x - 2][y] = '*';
         }
 
+    }
+
         // BAIXO
         if (x < 19 && m[x + 2][y] != 1) {
-            if (m[x + 2][y] == 2) {
-                pontos.CaixasDestruidas++;
-                pontos.Pontos += 10;
+            if (x > 0 && m[x + 2][y] ==2) {
+            srand(std::time(0));
+            int broco1=0;
+            broco1 = rand() % 20 + 1;
+            switch (broco1){
+            case 1:
+                m[x + 2][y] = 10;
+            break;
+            case 2:
+                m[x + 2][y] = 11;
+            break;
+            case 3:
+                m[x + 2][y] = 12;
+            break;
+            case 4:
+                m[x + 2][y] = 13;
+            break;
+            case 5:
+                m[x + 2][y] = 14;
+            break;
+            case 6:
+                m[x + 2][y] = 15;
+            break;
+            default:
+                m[x + 2][y] = '*';
+            break;
             }
+        }
+        if (x > 0 && m[x + 2][y] == 0 || x > 0 && m[x + 2][y] == 8){
             m[x + 2][y] = '*';
         }
+    }
 
         // ESQUERDA
         if (y > 1 && m[x][y - 2] != 1) {
-            if (m[x][y - 2] == 2) {
-                pontos.CaixasDestruidas++;
-                pontos.Pontos += 10;
+             if (x > 0 && m[x][y - 2] ==2){
+            srand(std::time(0));
+            int broco2=0;
+            broco2 = rand() % 20 + 1;
+            switch (broco2){
+            case 1:
+                m[x][y - 2] = 10;
+            break;
+            case 2:
+                m[x][y - 2] = 11;
+            break;
+            case 3:
+                m[x][y - 2] = 12;
+            break;
+            case 4:
+                m[x][y - 2] = 13;
+            break;
+            case 5:
+                m[x][y - 2] = 14;
+            break;
+            case 6:
+                m[x][y - 2] = 15;
+            break;
+            default:
+                m[x][y - 2] = '*';
+            break;
             }
+        }
+        if (x > 0 && m[x][y - 2] == 0 || x > 0 && m[x][y - 2] == 8){
             m[x][y - 2] = '*';
         }
+    }
 
         // DIREITA
         if (y < 38 && m[x][y + 2] != 1) {
-            if (m[x][y + 2] == 2) {
-                pontos.CaixasDestruidas++;
-                pontos.Pontos += 10;
+            if (x > 0 && m[x][y + 2] ==2){
+            srand(std::time(0));
+            int broco3=0;
+            broco3 = rand() % 20 + 1;
+            switch (broco3){
+            case 1:
+                m[x][y + 2] = 10;
+            break;
+            case 2:
+                m[x][y + 2] = 11;
+            break;
+            case 3:
+                m[x][y + 2] = 12;
+            break;
+            case 4:
+                m[x][y + 2] = 13;
+            break;
+            case 5:
+                m[x][y + 2] = 14;
+            break;
+            case 6:
+                m[x][y + 2] = 15;
+            break;
+            default:
+                m[x][y + 2] = '*';
+            break;
             }
+        }
+        if (x > 0 && m[x][y + 2] == 0 || x > 0 && m[x][y + 2] == 8){
             m[x][y + 2] = '*';
         }
+    }
     }
 
     bombaExiste = false;
@@ -526,49 +737,97 @@ void geracaoaleatoria (int m[21][40]) {
 
 }
 
-///MOVIMENTACAO DO JOGADOR
-Personagem movimentacaoJogador (int m[21][40], Personagem& jogador,Personagem& jogador2, PowerUps& Upgrades,Multiplayer& coop, Pontuacao& pontos, Pontuacao& pontos2) {
-if (_kbhit()) {
-            char tecla;
-            tecla = getch();
-            switch(tecla) {
-               case 72: ///CIMA
-                if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && m[jogador.x - 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador.x--;
-                    pontos.Movimento++;
-                } else if (jogador.x > 0 && m[jogador.x - 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador.x--;
-                    pontos.Movimento++;
+/// MOVIMENTACAO DO JOGADOR
+Personagem movimentacaoJogador(int m[21][40], Personagem& jogador, Personagem& jogador2, PowerUps& Upgrades, Multiplayer& coop, Pontuacao& pontos, Pontuacao& pontos2) {
+    if (_kbhit()) {
+        char tecla;
+        tecla = getch();
+        switch(tecla) {
+            case 72: /// CIMA
+                if (jogador.x > 0) {
+                    if ((m[jogador.x - 1][jogador.y] != 1 && m[jogador.x - 1][jogador.y] != 2 && m[jogador.x - 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x - 1, jogador.y, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador.x - 1][jogador.y] != 1)) {
+                        jogador.x--;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x][jogador.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x][jogador.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
                 }
                 break;
-                case 80: ///BAIXO
-                if (jogador.x < 20 && m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && m[jogador.x + 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador.x++;
-                    pontos.Movimento++;
-                } else if (jogador.x < 20 && m[jogador.x + 1][jogador.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador.x++;
-                    pontos.Movimento++;
+
+            case 80: /// BAIXO
+                if (jogador.x < 19) {
+                    if ((m[jogador.x + 1][jogador.y] != 1 && m[jogador.x + 1][jogador.y] != 2 && m[jogador.x + 1][jogador.y] != 9 && !posicaoOcupadaPelaBomba(jogador.x + 1, jogador.y, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador.x + 1][jogador.y] != 1)) {
+                        jogador.x++;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x][jogador.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x][jogador.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
                 }
                 break;
-                case 75: ///ESQUERDA
-                if (jogador.y > 0 && m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && m[jogador.x][jogador.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador.y--;
-                    pontos.Movimento++;
-                } else if (jogador.y > 0 && m[jogador.x][jogador.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador.y--;
-                    pontos.Movimento++;
+
+            case 75: /// ESQUERDA
+                if (jogador.y > 0) {
+                    if ((m[jogador.x][jogador.y - 1] != 1 && m[jogador.x][jogador.y - 1] != 2 && m[jogador.x][jogador.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y - 1, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador.x][jogador.y - 1] != 1)) {
+                        jogador.y--;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x][jogador.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x][jogador.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
                 }
                 break;
-                case 77: ///DIREITA
-                if (jogador.y < 39 && m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && m[jogador.x][jogador.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador.y++;
-                    pontos.Movimento++;
-                } else if (jogador.y < 39 && m[jogador.x][jogador.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador.y++;
-                    pontos.Movimento++;
+
+            case 77: /// DIREITA
+                if (jogador.y < 38) {
+                    if ((m[jogador.x][jogador.y + 1] != 1 && m[jogador.x][jogador.y + 1] != 2 && m[jogador.x][jogador.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador.x, jogador.y + 1, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador.x][jogador.y + 1] != 1)) {
+                        jogador.y++;
+                        pontos.Movimento++;
+                    }
+                    if (m[jogador.x][jogador.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador.x][jogador.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador.x][jogador.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
                 }
                 break;
-                case 13: /// ENTER PARA COLOCACAO DA BOMBA
+
+            case 13: /// ENTER PARA COLOCACAO DA BOMBA
                 if (!bombaExiste || Upgrades.MaisBomba) {
                     colocarBomba(jogador.x, jogador.y, m, Upgrades);
                     bombaExiste = true;
@@ -579,56 +838,100 @@ if (_kbhit()) {
                 }
                 break;
 
-                ///MOVIMENTACAO JOGADOR 2
-                       case 119: /// W - CIMA
-                if (coop.de2 && jogador2.x > 0 && m[jogador2.x - 1][jogador2.y] != 1 && m[jogador2.x - 1][jogador2.y] != 2 && m[jogador2.x - 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x - 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.x--;
-                    pontos2.Movimento++;
-                } else if (coop.de2 && jogador2.x > 0 && m[jogador2.x - 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.x--;
-                    pontos2.Movimento++;
-                }
-                break;
-
-                case 115: /// S - BAIXO
-                if (coop.de2 && jogador2.x < 20 && m[jogador2.x + 1][jogador2.y] != 1 && m[jogador2.x + 1][jogador2.y] != 2 && m[jogador2.x + 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x + 1, jogador2.y, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.x++;
-                    pontos2.Movimento++;
-                } else if (coop.de2 && jogador2.x < 20 && m[jogador2.x + 1][jogador2.y] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.x++;
-                    pontos2.Movimento++;
-                }
-                break;
-
-                case 97: /// A - ESQUERDA
-                if (coop.de2 && jogador2.y > 0 && m[jogador2.x][jogador2.y - 1] != 1 && m[jogador2.x][jogador2.y - 1] != 2 && m[jogador2.x][jogador2.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y - 1, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.y--;
-                    pontos2.Movimento++;
-                } else if (coop.de2 && jogador2.y > 0 && m[jogador2.x][jogador2.y - 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.y--;
-                    pontos2.Movimento++;
-                }
-                break;
-
-                case 100: /// D - DIREITA
-                if (coop.de2 && jogador2.y < 39 && m[jogador2.x][jogador2.y + 1] != 1 && m[jogador2.x][jogador2.y + 1] != 2 && m[jogador2.x][jogador2.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y + 1, m) && !Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.y++;
-                    pontos2.Movimento++;
-                } else if (coop.de2 && jogador2.y < 39 && m[jogador2.x][jogador2.y + 1] != 1 && Upgrades.PassarBlocosQuebraveis) {
-                    jogador2.y++;
-                    pontos2.Movimento++;
-                }
-                break;
-
-                case 32: // ESPAÇO PARA USAR A BOMBA PARA O JOGADOR 2
-                    if (coop.de2 && (!bombaExiste2 || Upgrades.MaisBomba)) {
-                        colocarBomba2(jogador2.x, jogador2.y, m, Upgrades);
-                        bombaExiste2 = true;
-                        pontos2.BombasUsadas++;
-                        pontos2.Pontos += 10;
-                        thread t(explosaoAssincrona, jogador2.x, jogador2.y, m, pontos, Upgrades);
-                        t.detach(); // DESANEXA A THREAD
+            /// MOVIMENTACAO JOGADOR 2
+            case 119: /// W - CIMA
+                if (coop.de2 && jogador2.x > 0) {
+                    if ((m[jogador2.x - 1][jogador2.y] != 1 && m[jogador2.x - 1][jogador2.y] != 2 && m[jogador2.x - 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x - 1, jogador2.y, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador2.x - 1][jogador2.y] != 1)) {
+                        jogador2.x--;
+                        pontos2.Movimento++;
                     }
+                    if (m[jogador2.x][jogador2.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador2.x][jogador2.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+                }
+                break;
+
+            case 115: /// S - BAIXO
+                if (coop.de2 && jogador2.x < 19) {
+                    if ((m[jogador2.x + 1][jogador2.y] != 1 && m[jogador2.x + 1][jogador2.y] != 2 && m[jogador2.x + 1][jogador2.y] != 9 && !posicaoOcupadaPelaBomba(jogador2.x + 1, jogador2.y, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador2.x + 1][jogador2.y] != 1)) {
+                        jogador2.x++;
+                        pontos2.Movimento++;
+                    }
+                    if (m[jogador2.x][jogador2.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador2.x][jogador2.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+                }
+                break;
+
+            case 97: /// A - ESQUERDA
+                if (coop.de2 && jogador2.y > 0) {
+                    if ((m[jogador2.x][jogador2.y - 1] != 1 && m[jogador2.x][jogador2.y - 1] != 2 && m[jogador2.x][jogador2.y - 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y - 1, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador2.x][jogador2.y - 1] != 1)) {
+                        jogador2.y--;
+                        pontos2.Movimento++;
+                    }
+                    if (m[jogador2.x][jogador2.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador2.x][jogador2.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+                }
+                break;
+
+            case 100: /// D - DIREITA
+                if (coop.de2 && jogador2.y < 38) {
+                    if ((m[jogador2.x][jogador2.y + 1] != 1 && m[jogador2.x][jogador2.y + 1] != 2 && m[jogador2.x][jogador2.y + 1] != 9 && !posicaoOcupadaPelaBomba(jogador2.x, jogador2.y + 1, m)) ||
+                        (Upgrades.PassarBlocosQuebraveis && m[jogador2.x][jogador2.y + 1] != 1)) {
+                        jogador2.y++;
+                        pontos2.Movimento++;
+                    }
+                    if (m[jogador2.x][jogador2.y] == 10) {
+                        Upgrades.PassarBlocosQuebraveis = true;
+                    } else if (m[jogador2.x][jogador2.y] == 11) {
+                        Upgrades.AumentoBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 12) {
+                        Upgrades.MaisBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 13) {
+                        Upgrades.SobreviverBomba = true;
+                    } else if (m[jogador2.x][jogador2.y] == 14) {
+                        Upgrades.DestruicaoMaisBlocos = true;
+                    }
+                }
+                break;
+
+            case 32: // ESPAÇO PARA USAR A BOMBA PARA O JOGADOR 2
+                if (coop.de2 && (!bombaExiste2 || Upgrades.MaisBomba)) {
+                    colocarBomba2(jogador2.x, jogador2.y, m, Upgrades);
+                    bombaExiste2 = true;
+                    pontos2.BombasUsadas++;
+                    pontos2.Pontos += 10;
+                    thread t(explosaoAssincrona, jogador2.x, jogador2.y, m, pontos2, Upgrades);
+                    t.detach(); // DESANEXA A THREAD
+                }
                 break;
                 }
             }
@@ -704,7 +1007,7 @@ srand(time(NULL));
     Pontuacao pontos2;
     MenuPrincipal(coop);
 
-
+    //PlaySound(TEXT("song.wav"),NULL,SND_SYNC);
 
         //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
         //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
@@ -725,7 +1028,7 @@ srand(time(NULL));
         ///MAPA FASE 1
 int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,8,8,8,0,0,0,0,0,0,0,9,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
+                    {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
 
                     {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,2,8,8,8,8,2,8,8,2,8,8,8,8,8,8,8,1,1,1},
 
@@ -741,9 +1044,9 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,8,8,8,8,2,8,8,8,8,8,8,2,8,8,8,1,1,1},
 
-                    {1,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,2,2,2,2,8,1,8,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,2,2,2,2,2,8,1,8,1},
 
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,8,8,1,1,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,2,8,2,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
                     {1,8,8,0,1,0,0,0,0,1,0,0,0,0,1,0,0,8,8,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,8,8,1,8,1},
 
@@ -775,7 +1078,7 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
                     {1,8,8,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,8,2,2,2,2,8,2,2,2,2,8,8,8,8,8,1,8,1},
 
-                    {1,0,0,0,9,0,0,0,0,0,0,0,0,0,0,9,8,8,8,0,0,1,8,2,8,8,8,8,2,8,8,2,8,2,2,2,8,1,1,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,2,8,8,8,8,2,8,8,2,8,2,2,2,8,1,1,1},
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,2,8,8,8,8,2,8,8,2,8,8,8,2,8,1,8,1},
 
@@ -795,11 +1098,11 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
 
-                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,9,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
-                    {1,0,9,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
+                    {1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
 
-                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,1,1},
 
                     {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,1,8,1},
 
@@ -816,11 +1119,11 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
                     {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,1,1},
 
-                    {1,8,8,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,9,1,0,0,0,0,1,0,0,0,0,8,8,1,8,8,1,8,1},
+                    {1,8,8,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,8,8,1,8,8,1,8,1},
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
 
-                    {1,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,8,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,8,1},
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
 
@@ -832,19 +1135,19 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
                     {1,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,1,8,8,1,1,1},
 
-                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,9,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
 
                     {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,8,1},
 
-                    {1,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
+                    {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,8,8,1,1,1},
 
-                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,9,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
+                    {1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,8,8,1,8,1},
 
-                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,1,1},
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,1,1},
 
-                    {1,8,8,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,8,1},
+                    {1,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,1,8,8,1,8,1},
 
                     {1,8,8,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,8,1,8,8,1,1,1},
 
@@ -1018,4 +1321,4 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
 
         }
     }
-return 0; }
+    return 0; }
