@@ -5,8 +5,7 @@
 #include <ctime>
 #include <thread> ///BIBLIOTECA UTILIZADA PARA FAZER O FUNCIONAMENTO DO CRONOMETRO DA BOMBA
 #include <locale.h>
-#include <MMsystem.h>
-
+#include <fstream>
 
 using namespace std;
 
@@ -102,6 +101,24 @@ void Menudificuldade(int& dificuldade) { ///MENU DE DIFICULDADE DO JOGO
                 }
         }
 
+
+
+    void verranking() {
+    ifstream entrada("ranking.txt");
+
+    if (!entrada.is_open()) {
+        cerr << "ERRO AO VISUALIZAR RANKING" << endl;
+        return;
+    }
+
+    string linha;
+    while (getline(entrada, linha)) {
+        cout << linha << endl;
+    }
+
+    entrada.close();
+}
+
     void MenuPrincipal(Multiplayer& coop) { ///MENU PRINCIPAL
     srand(time(NULL));
     char tecla1;
@@ -161,7 +178,7 @@ void Menudificuldade(int& dificuldade) { ///MENU DE DIFICULDADE DO JOGO
                 break;
 
             case 5:
-                cout << "RANKING" << endl;
+                verranking();
                 system("pause");
                 break;
 
@@ -203,7 +220,7 @@ void Menudificuldade(int& dificuldade) { ///MENU DE DIFICULDADE DO JOGO
     }
 
 
-void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, Inimigo inimigo1, Inimigo inimigo2, Inimigo inimigo3, Inimigo inimigo4, Inimigo inimigo5, Inimigo inimigo6, Inimigo inimigo7, COORD coord, Multiplayer coop,Pontuacao& pontos,Pontuacao& pontos2,PowerUps& Upgrades) {
+void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, Inimigo inimigo1, Inimigo inimigo2, Inimigo inimigo3, Inimigo inimigo4, Inimigo inimigo5, Inimigo inimigo6, Inimigo inimigo7, COORD coord, Multiplayer coop,Pontuacao& pontos,Pontuacao& pontos2,PowerUps& Upgrades, bool ranking, string& nickname) {
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 
         //IMPRIME O MAPA E OS PERSONAGENS
@@ -226,12 +243,12 @@ void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, I
                     case 8: cout << " "; break;             ///AREA DE NASCIMENTO
                     case 9: cout << char(176); break;       ///UPGRADES - POWER UPS
                     case '*': cout << char(158); break;     ///EXPLOSAO DA BOMBA
-                    case 10: cout << char(101); break;     ///POWER UP
-                    case 11: cout << char(102); break;     ///POWER UP
-                    case 12: cout << char(103); break;     ///POWER UP
-                    case 13: cout << char(104); break;     ///POWER UP
-                    case 14: cout << " "; break;     ///POWER UP
-                    case 15: cout << " "; break;     ///POWER UP
+                    case 10: cout << char(158); break;     ///POWER UP
+                    case 11: cout << char(157); break;     ///POWER UP
+                    case 12: cout << char(111); break;     ///POWER UP
+                    case 13: cout << char(169); break;     ///POWER UP
+                    case 14: cout << char(202); break;     ///POWER UP
+                    case 15: cout << char(201); break;     ///POWER UP
 
                 }
             }
@@ -245,7 +262,8 @@ void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, I
         cout << "|PJ2 : "  << pontos2.Pontos << " | MF2 - " << pontos2.Movimento << " | BU2 -  " << pontos2.BombasUsadas << " | IN.A2  - " << pontos2.InimigosAbatidos << " | CX2: " << pontos2.CaixasDestruidas << " |" << endl;
         } /// PONTUACAO DO JOGADOR 2
         cout << "_____________________________________________________________________ " << endl;
-        cout << " ";
+
+    cout << " ";
         if (Upgrades.AumentoBomba == true){
             cout << " | DESTRUIR MAIS BLOCOS - AUMENTO DO RAIO | " << endl;
         }
@@ -260,9 +278,32 @@ void imprimirMapa(const int m[21][40], Personagem jogador,Personagem jogador2, I
         cout << " ";
         if (Upgrades.PassarBlocosQuebraveis == true){
             cout << " |  ATRAVESSAR BLOCOS  | " << endl;
+
+
         }
 
 
+        if (ranking) {
+        ofstream saida("ranking.txt");
+
+        if (!saida.is_open()) {
+            cerr << "ERRO AO INSERIR AS INFORMAÇÕES" << endl;
+            return;
+        }
+
+        saida << "_____________________________________________________________________ " << endl;
+        saida << "| " << nickname << endl;
+        saida << "|PONTOS TOTAIS : " << pontos.Pontos << " | NUM DE MOVIMENTOS -  " << pontos.Movimento << " | BOMBAS USADAS - " << pontos.BombasUsadas << " | INIMIGOS ABATIDOS -  " << pontos.InimigosAbatidos << " |" << endl;
+        saida << "\n" << endl;
+        if (coop.de2 == true) {
+        saida << "|PONTOS TOTAIS DO PLAYER 2  : " << pontos2.Pontos << " | NUM DE MOVIMENTOS - " << pontos2.Movimento << " | BOMBAS USADAS -  " << pontos2.BombasUsadas << " | INIMIGOS ABATIDOS -  " << pontos2.InimigosAbatidos << " |" << endl;
+        }
+        saida << "_____________________________________________________________________ " << endl;
+
+        saida.close();
+
+
+        }
 }
 
 bool posicaoOcupadaPelaBomba(int x, int y, int m[21][40]) {
@@ -1007,7 +1048,9 @@ srand(time(NULL));
     Pontuacao pontos2;
     MenuPrincipal(coop);
 
-    //PlaySound(TEXT("song.wav"),NULL,SND_SYNC);
+string nickname;
+    cout << "| DIGITE O SEU NICKNAME: ";
+    getline(cin, nickname);
 
         //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
         //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
@@ -1179,7 +1222,7 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
     while(!ganhou){
 
         if(fase==1){
-            imprimirMapa(m1, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades); //IMPRIME O MAPA
+            imprimirMapa(m1, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades, false, nickname); //IMPRIME O MAPA
             //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
             if (coop.de2 == false){
                 if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { // Verifica a colisão dos inimigos com o usuário
@@ -1242,7 +1285,7 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
             verificarExplosao(jogador, jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m1,Upgrades,coop, pontos);
         }
         if(fase==2){
-            imprimirMapa(m2, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades); //IMPRIME O MAPA
+            imprimirMapa(m2, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades, false, nickname); //IMPRIME O MAPA
 
             //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
             if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
@@ -1269,6 +1312,9 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
                 fase = 3;
             }
 
+
+
+
             //EXECUTA OS MOVIMENTOS DO USUARIO
             movimentacaoJogador(m2, jogador,jogador2, Upgrades,coop, pontos, pontos2);
 
@@ -1285,7 +1331,7 @@ int m1 [21][40] = { {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,8,8,8,8,8,8,8,8,8,8
             verificarExplosao(jogador, jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, m2,Upgrades,coop, pontos);
         }
         if(fase==3){
-            imprimirMapa(m3, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades); //IMPRIME O MAPA
+            imprimirMapa(m3, jogador,jogador2, inimigo1, inimigo2, inimigo3, inimigo4, inimigo5, inimigo6, inimigo7, coord, coop, pontos, pontos2, Upgrades, true, nickname); //IMPRIME O MAPA
 
             //VERIFICACAO DE DERROTA EM CASO DO INIMIGO ATINGIR O JOGADOR
            if (jogador.x == inimigo1.x && jogador.y == inimigo1.y || jogador.x == inimigo2.x && jogador.y == inimigo2.y || jogador.x == inimigo3.x && jogador.y == inimigo3.y || jogador.x == inimigo4.x && jogador.y == inimigo4.y || jogador.x == inimigo5.x && jogador.y == inimigo5.y || jogador.x == inimigo6.x && jogador.y == inimigo6.y || jogador.x == inimigo7.x && jogador.y == inimigo7.y && Upgrades.Jogador1Vidas == 0) { //VERIFICA A COLISAO DOS INIMIGOS COM O USUARIO
