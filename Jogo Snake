@@ -1,0 +1,147 @@
+#include <iostream>
+#include <windows.h>
+#include <conio.h>
+#include <cstdlib>
+#include <ctime>
+
+
+using namespace std;
+
+/*
+void ImprimirMapa(int mapa[20][20], COORD coord){
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+    for (int i = 0; i < 20; i++){
+        for (int j = 0; j < 20; j++){
+                 switch (mapa[i][j]) {
+                    case 0: cout << " "; break;             ///BLOCO VAZIO
+                    case 1: cout << char(219); break;       ///BLOCO INDESTRUTIVEL
+                    case 2: cout << char(155); break;
+
+                }
+
+        }
+        cout << "  " << endl;
+    }
+}
+*/
+int main()
+{
+    int tamanho=3, maca=0;
+    int ChanceDaMaca= 0,ChanceDaMaca1= 0;
+    char croba[tamanho];
+    bool VerificarMaca= false;
+
+
+    int mapa[20][20]={ {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                       {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
+
+
+    cout << "Hello world!" << endl;
+    for (int i = 0; i < 20; i++){
+        for (int j = 0; j < 20; j++){
+                if (mapa[i][j] != 1 && VerificarMaca == false){
+                    mapa[ChanceDaMaca = rand() % 20 + 1][ChanceDaMaca1 = rand() % 20 + 1];
+                    mapa[i][j] = 2;
+
+                    if (mapa[i][j] == 2){
+                        VerificarMaca= true;
+                    }else{
+                        mapa[i][j]= 0;
+                    }
+                }
+                 switch (mapa[i][j]) {
+                    case 0: cout << " "; break;             ///BLOCO VAZIO
+                    case 1: cout << char(219); break;       ///BLOCO INDESTRUTIVEL
+                    case 2: cout << char(155); break;
+
+                }
+
+        }
+        cout << "  " << endl;
+    }
+        for (int k = 1; k <= tamanho; k++){
+            if (croba[k] == tamanho){
+                croba[k]=char(1);
+            }else{
+                croba[k]=char(111);
+            }
+        }
+        cout << "  " << endl;
+     //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
+        //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+        HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_CURSOR_INFO     cursorInfo;
+        GetConsoleCursorInfo(out, &cursorInfo);
+        cursorInfo.bVisible = false; // set the cursor visibilite
+        SetConsoleCursorInfo(out, &cursorInfo);
+        //FIM: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
+        //INICIO: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+        short int CX=0, CY=0;
+        COORD coord;
+        coord.X = CX;
+        coord.Y = CY;
+        //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
+        //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
+         char tecla;
+    while(true){
+
+        //ImprimirMapa(mapa, coord); //IMPRIME O MAPA
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+    for (int i = 0; i < 20; i++){
+        for (int j = 0; j < 20; j++){
+                 switch (mapa[i][j]) {
+                    case 0: cout << " "; break;             ///BLOCO VAZIO
+                    case 1: cout << char(219); break;       ///BLOCO INDESTRUTIVEL
+                    case 2: cout << char(4); break;
+
+                }
+
+        }
+        cout << "  " << endl;
+    }
+/*
+        //EXECUTA OS MOVIMENTOS DO USUARIO
+         if (_kbhit()) {
+            tecla = getch();
+            switch(tecla)
+            {
+
+                case 72: case 'w': ///CIMA
+                   // x--;
+                break;
+
+                case 80: case 's': ///BAIXO
+                    //x++;
+                break;
+
+                case 75:case 'a': ///ESQUERDA
+                    //y--;
+                break;
+
+
+                case 77: case 'd': ///DIREITA
+                    //y++;
+                break;
+          }
+        }
+        */
+    }
+    return 0;
+}
