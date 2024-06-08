@@ -4,87 +4,148 @@
 #include <cstdlib>
 #include <ctime>
 
-
 using namespace std;
 
-/*
-void ImprimirMapa(int mapa[20][20], COORD coord){
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-    for (int i = 0; i < 20; i++){
-        for (int j = 0; j < 20; j++){
-                 switch (mapa[i][j]) {
-                    case 0: cout << " "; break;             ///BLOCO VAZIO
-                    case 1: cout << char(219); break;       ///BLOCO INDESTRUTIVEL
-                    case 2: cout << char(155); break;
+const int largura = 20;
+const int altura = 20;
+//int mapa[altura][largura];
+int Mapa[20][20];
+int x, y, MacaX, MacaY, pontos;
+int CorpoX[100], CorpoY[100];
+int TamanhoDoCorpo;
+bool FimDeJogo= false;
+enum eDirecao { PARADO = 0, ESQUERDA, DIREITA, CIMA, BAIXO };
+eDirecao dir;
 
-                }
+void Padrao() {
+    FimDeJogo = false;
+    dir = PARADO;
+    x = largura / 2;
+    y = altura / 2;
+    MacaX = rand() % largura;
+    MacaY = rand() % altura;
+    pontos = 0;
+    TamanhoDoCorpo = 0;
 
+    // Inicializa o mapa com as paredes e o espaço vazio
+    for (int i = 0; i < altura; i++) {
+        for (int j = 0; j < largura; j++) {
+            if (i == 0 || i == altura - 1 || j == 0 || j == largura - 1)
+                Mapa[i][j] = 1; // Parede
+            else
+                Mapa[i][j] = 0; // Espaço vazio
         }
-        cout << "  " << endl;
     }
 }
-*/
-int main()
-{
-    int tamanho=3, maca=0;
-    int ChanceDaMaca= 0,ChanceDaMaca1= 0;
-    char croba[tamanho];
-    bool VerificarMaca= false;
 
 
-    int mapa[20][20]={ {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-                       {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
-
-
-    cout << "Hello world!" << endl;
-    for (int i = 0; i < 20; i++){
-        for (int j = 0; j < 20; j++){
-                if (mapa[i][j] != 1 && VerificarMaca == false){
-                    mapa[ChanceDaMaca = rand() % 20 + 1][ChanceDaMaca1 = rand() % 20 + 1];
-                    mapa[i][j] = 2;
-
-                    if (mapa[i][j] == 2){
-                        VerificarMaca= true;
-                    }else{
-                        mapa[i][j]= 0;
+void ImprimirMapa(COORD coord) {
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+    coord.X = 0;
+    coord.Y = 0;
+    for (int i = 0; i < altura; i++) {
+        for (int j = 0; j < largura; j++) {
+            if (i == y && j == x)
+                cout << char(169); //CABEÇA DA CROBA
+            else if (i == MacaY && j == MacaX)
+                cout << char(111); // A MAÇA
+            else {
+                bool imprimir = false;
+                for (int k = 0; k < TamanhoDoCorpo; k++) {
+                    if (CorpoX[k] == j && CorpoY[k] == i) {
+                        cout << char(155); // O CORPO DA CROBA
+                        imprimir = true;
                     }
                 }
-                 switch (mapa[i][j]) {
-                    case 0: cout << " "; break;             ///BLOCO VAZIO
-                    case 1: cout << char(219); break;       ///BLOCO INDESTRUTIVEL
-                    case 2: cout << char(155); break;
-
+                if (!imprimir) {
+                    switch (Mapa[i][j]) {
+                    case 0: cout << " "; break;    // Espaço vazio
+                    case 1: cout << char(219); break; // Parede
+                    }
                 }
-
-        }
-        cout << "  " << endl;
-    }
-        for (int k = 1; k <= tamanho; k++){
-            if (croba[k] == tamanho){
-                croba[k]=char(1);
-            }else{
-                croba[k]=char(111);
             }
         }
-        cout << "  " << endl;
-     //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
+        cout << endl;
+    }
+    cout << "Pontos: " << pontos << endl;
+}
+
+void Movimentos() {
+    if (_kbhit()) {
+        switch (_getch()) {
+            case 72: case 'w': ///CIMA
+                dir = CIMA;
+            break;
+
+            case 80: case 's': ///BAIXO
+                dir = BAIXO;
+            break;
+
+            case 75:case 'a': ///ESQUERDA
+                dir = ESQUERDA;
+            break;
+
+            case 77: case 'd': ///DIREITA
+                dir = DIREITA;
+            break;
+        }
+    }
+}
+
+void Estrutura() {
+    int prevX = CorpoX[0];
+    int prevY = CorpoY[0];
+    int prev2X, prev2Y;
+    CorpoX[0] = x;
+    CorpoY[0] = y;
+    for (int i = 1; i < TamanhoDoCorpo; i++) {
+        prev2X = CorpoX[i];
+        prev2Y = CorpoY[i];
+        CorpoX[i] = prevX;
+        CorpoY[i] = prevY;
+        prevX = prev2X;
+        prevY = prev2Y;
+    }
+    switch (dir) {
+    case ESQUERDA:
+        x--;
+        break;
+    case DIREITA:
+        x++;
+        break;
+    case CIMA:
+        y--;
+        break;
+    case BAIXO:
+        y++;
+        break;
+    default:
+        break;
+    }
+    if (x + 1 >= largura || x < 0 || y + 1 >= altura || y < 0) ////////////  AQUI EU FIZ COM QUE ELE MORRA AO TOCAR NA PAREDE
+        FimDeJogo = true;
+    for (int i = 0; i < TamanhoDoCorpo; i++)
+        if (CorpoX[i] == x && CorpoY[i] == y)
+            FimDeJogo = true;
+    if (x == MacaX && y == MacaY) {
+        pontos += 10;
+        MacaX = rand() % largura + 1;       ////////// AQUI TEM Q ARRUMAR A LOGICA DA MAÇA, POIS ELA APARECE DENTRO DAS PAREDES
+        MacaY = rand() % altura + 1;
+    if (MacaX >= largura && MacaY >= largura || MacaX >= altura && MacaY >= altura ){
+        while (MacaX == 1 && MacaY == 1 || MacaX == 1 && MacaY == 1){
+           MacaX = rand() % largura + 1;
+            MacaY = rand() % altura + 1;
+        }
+    }
+        //MacaX = rand() % largura + 1;
+        //MacaY = rand() % altura + 1;
+        TamanhoDoCorpo++;
+    }
+}
+
+int main() {
+    srand(time(0));
+            //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
         //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
         HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
         CONSOLE_CURSOR_INFO     cursorInfo;
@@ -99,49 +160,14 @@ int main()
         coord.Y = CY;
         //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
         //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
-         char tecla;
-    while(true){
 
-        //ImprimirMapa(mapa, coord); //IMPRIME O MAPA
+    Padrao();
+    while (!FimDeJogo) {
         SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-    for (int i = 0; i < 20; i++){
-        for (int j = 0; j < 20; j++){
-                 switch (mapa[i][j]) {
-                    case 0: cout << " "; break;             ///BLOCO VAZIO
-                    case 1: cout << char(219); break;       ///BLOCO INDESTRUTIVEL
-                    case 2: cout << char(4); break;
-
-                }
-
-        }
-        cout << "  " << endl;
-    }
-/*
-        //EXECUTA OS MOVIMENTOS DO USUARIO
-         if (_kbhit()) {
-            tecla = getch();
-            switch(tecla)
-            {
-
-                case 72: case 'w': ///CIMA
-                   // x--;
-                break;
-
-                case 80: case 's': ///BAIXO
-                    //x++;
-                break;
-
-                case 75:case 'a': ///ESQUERDA
-                    //y--;
-                break;
-
-
-                case 77: case 'd': ///DIREITA
-                    //y++;
-                break;
-          }
-        }
-        */
+        ImprimirMapa(coord);
+        Movimentos();
+        Estrutura();
+        Sleep(100); // AJUSTA A VELOCIDADE DO JOGO
     }
     return 0;
 }
