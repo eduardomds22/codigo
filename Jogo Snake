@@ -17,6 +17,10 @@ bool FimDeJogo= false;
 enum eDirecao { PARADO = 0, ESQUERDA, DIREITA, CIMA, BAIXO };
 eDirecao dir;
 
+void SetColor(int value) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), value);
+}
+
 void Padrao() {
     FimDeJogo = false;
     dir = PARADO;
@@ -40,21 +44,28 @@ void Padrao() {
 
 
 void ImprimirMapa(COORD coord) {
+    SetColor(6);
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
     coord.X = 0;
     coord.Y = 0;
     for (int i = 0; i < altura; i++) {
         for (int j = 0; j < largura; j++) {
-            if (i == y && j == x)
+            if (i == y && j == x){
+                SetColor(10);                /// A COR É O SEGUINTE, SO MUDAR O NUMERO DE 1 A 15
                 cout << char(169); //CABEÇA DA CROBA
-            else if (i == MacaY && j == MacaX)
+                SetColor(6);                 /// DEPOIS ALTERE PARA O VALOR DO MAPA PARA NAO BUGAR     
+            }else if (i == MacaY && j == MacaX){
+                SetColor(4);
                 cout << char(111); // A MAÇA
-            else {
+                SetColor(6);
+            }else {
                 bool imprimir = false;
                 for (int k = 0; k < TamanhoDoCorpo; k++) {
                     if (CorpoX[k] == j && CorpoY[k] == i) {
+                        SetColor(10);
                         cout << char(155); // O CORPO DA CROBA
                         imprimir = true;
+                        SetColor(6);
                     }
                 }
                 if (!imprimir) {
@@ -67,7 +78,9 @@ void ImprimirMapa(COORD coord) {
         }
         cout << endl;
     }
+    SetColor(11);
     cout << "Pontos: " << pontos << endl;
+    SetColor(6);
 }
 
 void Movimentos() {
@@ -122,7 +135,7 @@ void Estrutura() {
     default:
         break;
     }
-    if (x + 1 >= largura || x -1 < 0 || y + 1 >= altura || y - 1 < 0) ////////////  AQUI EU FIZ COM QUE ELE MORRA AO TOCAR NA PAREDE
+    if (x + 1 >= largura || x < 0 || y + 1 >= altura || y < 0) ////////////  AQUI EU FIZ COM QUE ELE MORRA AO TOCAR NA PAREDE
         FimDeJogo = true;
     for (int i = 0; i < TamanhoDoCorpo; i++)
         if (CorpoX[i] == x && CorpoY[i] == y)
