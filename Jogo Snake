@@ -3,109 +3,144 @@
 #include <conio.h>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
+#include <algorithm>
+#include <thread>
 
 using namespace std;
 
+struct Jogador {
+    string nome;
+    int pontuacao;
+};
+struct Temporizador{
+    int Tempo = 0;
+
+};
+
+// Função de comparação para ordenar os Scores em ordem decrescente
+bool CompararPontos(const Jogador& a, const Jogador& b) {
+    return a.pontuacao > b.pontuacao;
+}
+
 const int largura = 20;
 const int altura = 20;
-//int mapa[altura][largura];
 int Mapa[20][20];
 int x, y, MacaX, MacaY, pontos;
 int CorpoX[100], CorpoY[100];
 int TamanhoDoCorpo;
-bool FimDeJogo= false;
-enum eDirecao { PARADO = 0, ESQUERDA, DIREITA, CIMA, BAIXO };
-eDirecao dir;
+bool FimDeJogo = false;
+enum Direcao { PARADO = 0, ESQUERDA, DIREITA, CIMA, BAIXO };
+Direcao D_cursor; // DIREÇÕES
+int velocidade = 100; // VELOCIDADE INICIAL
+vector<Jogador> ranking;
 
 void SetColor(int value) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), value);
 }
 
-void Padrao() {
+void Escopo_do_jogo() {
     FimDeJogo = false;
-    dir = PARADO;
+    D_cursor = CIMA; // INICIA O MOVIMENTO PARA CIMA
     x = largura / 2;
     y = altura / 2;
-    MacaX = rand() % largura;
-    MacaY = rand() % altura;
-    pontos = 0;
-    TamanhoDoCorpo = 0;
+    pontos = 0; // PONTUAÇÃO COMEÇA COM 0
+    TamanhoDoCorpo = 3; // FAZ COM QUE A COBRA INICIE COM 3 DE TAMANHO
 
-    // Inicializa o mapa com as paredes e o espaço vazio
+    // COORDENADAS DO CORPO DA COBRA
+    for (int i = 0; i < TamanhoDoCorpo; i++) {
+        CorpoX[i] = x - i;
+        CorpoY[i] = y;
+    }
+
+    // PAREDES E MAPA
     for (int i = 0; i < altura; i++) {
         for (int j = 0; j < largura; j++) {
             if (i == 0 || i == altura - 1 || j == 0 || j == largura - 1)
-                Mapa[i][j] = 1; // Parede
+                Mapa[i][j] = 1; // PAREDES
             else
-                Mapa[i][j] = 0; // Espaço vazio
+                Mapa[i][j] = 0; // ESPAÇO JOGAVEL DO MAPA
         }
     }
+
+    // POSICAO INICIAL DA MAÇÃ
+    do {
+        MacaX = rand() % (largura - 2) + 1;
+        MacaY = rand() % (altura - 2) + 1;
+    } while (Mapa[MacaY][MacaX] != 0);
 }
 
-
-void ImprimirMapa(COORD coord) {
-    SetColor(6);
+void Imprimir_Mapa(COORD coord, int corCabeca, int corCorpo, int corMaca) {
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+    SetColor(6);
     coord.X = 0;
     coord.Y = 0;
+
     for (int i = 0; i < altura; i++) {
         for (int j = 0; j < largura; j++) {
-            if (i == y && j == x){
-                SetColor(10);                /// A COR É O SEGUINTE, SO MUDAR O NUMERO DE 1 A 15
-                cout << char(169); //CABEÇA DA CROBA
-                SetColor(6);                 /// DEPOIS ALTERE PARA O VALOR DO MAPA PARA NAO BUGAR     
-            }else if (i == MacaY && j == MacaX){
-                SetColor(4);
-                cout << char(111); // A MAÇA
+            if (i == y && j == x) {
+                SetColor(corCabeca);
+                cout << char(148); // CABEÇA DA COBRA
                 SetColor(6);
-            }else {
+            } else if (i == MacaY && j == MacaX) {
+                SetColor(corMaca);
+                cout << char(207); // MAÇA
+                SetColor(6);
+            } else {
                 bool imprimir = false;
                 for (int k = 0; k < TamanhoDoCorpo; k++) {
                     if (CorpoX[k] == j && CorpoY[k] == i) {
-                        SetColor(10);
-                        cout << char(155); // O CORPO DA CROBA
+                        SetColor(corCorpo);
+                        cout << char(169); // CORPO DA COBRA
                         imprimir = true;
                         SetColor(6);
                     }
                 }
                 if (!imprimir) {
                     switch (Mapa[i][j]) {
-                    case 0: cout << " "; break;    // Espaço vazio
-                    case 1: cout << char(219); break; // Parede
+                        case 0: cout << " "; break; // ESPAÇOS DO MAPA - VAZIOS
+                        case 1: cout << char(219); break; // PAREDES DO MAPA
                     }
                 }
             }
         }
         cout << endl;
     }
+
     SetColor(11);
-    cout << "Pontos: " << pontos << endl;
+    cout << "|PONTUACAO : " << pontos << endl;
     SetColor(6);
+}
+
+// IMPLEMENTAÇÃO DA SOBRECARGA
+void Imprimir_Mapa(COORD coord) {
+    Imprimir_Mapa(coord, 10, 10, 4); // CORES PADRAO NO JOGO
 }
 
 void Movimentos() {
     if (_kbhit()) {
         switch (_getch()) {
-            case 72: case 'w': ///CIMA
-                dir = CIMA;
-            break;
-
-            case 80: case 's': ///BAIXO
-                dir = BAIXO;
-            break;
-
-            case 75:case 'a': ///ESQUERDA
-                dir = ESQUERDA;
-            break;
-
-            case 77: case 'd': ///DIREITA
-                dir = DIREITA;
-            break;
+            case 72: case 'w': // CIMA
+                if (D_cursor != BAIXO) // IMPEDE MOVIMENTOS CONTRARIOS
+                    D_cursor = CIMA;
+                break;
+            case 80: case 's': // BAIXO
+                if (D_cursor != CIMA) // IMPEDE MOVIMENTOS CONTRARIOS
+                    D_cursor = BAIXO;
+                break;
+            case 75: case 'a': // ESQUERDA
+                if (D_cursor != DIREITA) // IMPEDE MOVIMENTOS CONTRARIOS
+                    D_cursor = ESQUERDA;
+                break;
+            case 77: case 'd': // DIREITA
+                if (D_cursor != ESQUERDA) // IMPEDE MOVIMENTOS CONTRARIOS
+                    D_cursor = DIREITA;
+                break;
         }
     }
 }
 
-void Estrutura() {
+bool Estrutura() {
     int prevX = CorpoX[0];
     int prevY = CorpoY[0];
     int prev2X, prev2Y;
@@ -119,68 +154,162 @@ void Estrutura() {
         prevX = prev2X;
         prevY = prev2Y;
     }
-    switch (dir) {
-    case ESQUERDA:
-        x--;
-        break;
-    case DIREITA:
-        x++;
-        break;
-    case CIMA:
-        y--;
-        break;
-    case BAIXO:
-        y++;
-        break;
-    default:
-        break;
+
+    // ATUALIZA AS DIREÇÕES
+    switch (D_cursor) {
+        case ESQUERDA:
+            x--;
+            break;
+        case DIREITA:
+            x++;
+            break;
+        case CIMA:
+            y--;
+            break;
+        case BAIXO:
+            y++;
+            break;
+        default:
+            break;
     }
-    if (x + 1 >= largura || x < 0 || y + 1 >= altura || y < 0) ////////////  AQUI EU FIZ COM QUE ELE MORRA AO TOCAR NA PAREDE
-        FimDeJogo = true;
-    for (int i = 0; i < TamanhoDoCorpo; i++)
-        if (CorpoX[i] == x && CorpoY[i] == y)
-            FimDeJogo = true;
-    if (x == MacaX && y == MacaY) {
-        pontos += 10;
-        MacaX = rand() % largura + 1;       ////////// AQUI TEM Q ARRUMAR A LOGICA DA MAÇA, POIS ELA APARECE DENTRO DAS PAREDES
-        MacaY = rand() % altura + 1;
-    if (MacaX >= largura && MacaY >= largura || MacaX >= altura && MacaY >= altura ){
-        while (MacaX == 1 && MacaY == 1 || MacaX == 1 && MacaY == 1){
-           MacaX = rand() % largura + 1;
-            MacaY = rand() % altura + 1;
+
+    // COLISÃO COM AS PAREDES
+    if (Mapa[y][x] == 1) {
+        return false; // ENCERRA O JOGO CASO COLIDA COM O AS PAREDES
+    }
+
+    // COLISÃO COM O PROPRIO CORPO
+    for (int i = 1; i < TamanhoDoCorpo; i++) {
+        if (CorpoX[i] == x && CorpoY[i] == y) {
+            return false; // ENCERRA O JOGO CASO COLIDA COM O SEU CORPO
         }
     }
-        //MacaX = rand() % largura + 1;
-        //MacaY = rand() % altura + 1;
+
+    // VERIFICA SE A COBRA COMEU A MAÇÃ
+    if (x == MacaX && y == MacaY) {
+        pontos += 10; // AUMENTA 10 PONTOS A CADA MAÇA
+        if (pontos % 50 == 0) {  // VERIFICA A QUANTIDADE DE MAÇAS COMIDAS
+            velocidade -= 10;   // REDUZ A VELOCIDADE
+        }
+        if (pontos >= 1000) { // VERIFICA SE A PONTUAÇÃO ATINGIU 1000 PONTOS
+            cout << "| PARABENS, VOCE CONSEGUIU ALIMENTAR TOTALMENTE A SNAKE E GANHOU O JOGO |" << endl;
+            return false; // ENCERRA O JOGO - CONDIÇÃO DE VITORIA
+        }
+        do {
+            MacaX = rand() % (largura - 2) + 1; // GERA AS MAÇAS DENTRO DO ESPAÇO PERMITIDO
+            MacaY = rand() % (altura - 2) + 1; // GERA AS MAÇAS DENTRO DO ESPAÇO PERMITIDO
+        } while (Mapa[MacaY][MacaX] != 0);
+
         TamanhoDoCorpo++;
+    }
+
+    return true; // RETORNA SE QUISER CONTINUAR
+}
+
+void verranking() {
+    sort(ranking.begin(), ranking.end(), CompararPontos);
+    for (const auto& jogador : ranking) {
+        cout << "____________________________________________________________________  " << endl;
+        cout << "                        !!!    RANKING  !!!                           " << endl;
+        cout << "\n";
+        cout << "Nome: " << jogador.nome << ", Pontuacao: " << jogador.pontuacao << endl;
+        cout << "____________________________________________________________________  " << endl;
+    }
+    //system("pause");
+}
+
+void MenuPrincipal() { // MENU PRINCIPAL
+    SetColor(6);
+    srand(time(NULL));
+    int escolha;
+    bool back = false;
+
+    while (!back) {
+        system("cls");
+        cout << "____________________________________________________________________        \n " << endl;
+        cout << "                    * BEM VINDO AO JOGO DA COBRINHA *                          " << endl;
+        cout << "                       |* MENU DE OPCOES *|                                  \n" << endl;
+        cout << "                     1 - INICIAR O JOGO                                        " << endl;
+        cout << "                     2 - EXPLICACAO PONTUACAO                                  " << endl;
+        cout << "                     3 - RANKING DE PONTUACOES                                 " << endl;
+        cout << "                     4 - DESENVOLVEDORES                                       " << endl;
+        cout << "                     5 - SAIR DO JOGO                                          " << endl;
+        cout << "_____________________________________________________________________         \n " << endl;
+        cin >> escolha;
+        system("cls");
+
+        switch (escolha) {
+            case 1:
+                back = true;
+                break;
+            case 2:
+                cout << "____________________________________________________________________  " << endl;
+                cout << "                   * REGRAS DO JOGO E TUTORIAL * \n                   " << endl;
+                cout << "     O JOGADOR DEVE USAR AS TECLAS INDICATIVAS PARA SE MOVIMENTAR     " << endl;
+                cout << "  O JOGADOR NÃO PODE COLIDIR COM AS PAREDES E COM SEU PROPRIO CORPO   " << endl;
+                cout << "     A CADA MACA INGERIDA, O JOGADOR GANHA 10 PONTOS NO SEU SCORE     " << endl;
+                cout << "      A CADA 5 MACAS INGERIDAS,A VELOCIDADE DE MOVIMENTO AUMENTA      " << endl;
+                cout << "   O JOGADOR SÓ ATINGE A CONDICAO DE VITORIA AO INGERIR 1000 PONTOS    " << endl;
+                cout << "____________________________________________________________________  " << endl;
+                system("pause");
+                break;
+            case 3:
+                verranking();
+                system("pause");
+                break;
+            case 4:
+                cout << "_______________________________________________________________  " << endl;
+                cout << "               * INFORMACAO SOBRE OS CRIADORES * \n              " << endl;
+                cout << "                CAIO CARDOSO  -  EDUARDOS MENDES \n              " << endl;
+                cout << "                   ALGORITMOS E PROGRAMACAO II \n                " << endl;
+                cout << "                    PROFESSOR - ALEX RESE  \n                    " << endl;
+                cout << "_______________________________________________________________  " << endl;
+                system("pause");
+                break;
+            case 5:
+                cout << "____________________________________________________________________  " << endl;
+                cout << "      !!!    VOCE ENCERROU O JOGO, ATE UMA PROXIMA VEZ   !!!          " << endl;
+                cout << "____________________________________________________________________  " << endl;
+                exit(0);
+            default:
+                cout << "- ESCOLHA INVALIDA -" << endl;
+                break;
+        }
     }
 }
 
 int main() {
     srand(time(0));
-            //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, A SEGUIR.
-        //INICIO: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
-        HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-        CONSOLE_CURSOR_INFO     cursorInfo;
-        GetConsoleCursorInfo(out, &cursorInfo);
-        cursorInfo.bVisible = false; // set the cursor visibilite
-        SetConsoleCursorInfo(out, &cursorInfo);
-        //FIM: COMANDOS PARA QUE O CURSOR NAO FIQUE PISCANDO NA TELA
-        //INICIO: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
-        short int CX=0, CY=0;
-        COORD coord;
-        coord.X = CX;
-        coord.Y = CY;
-        //FIM: COMANDOS PARA REPOSICIONAR O CURSOR NO INICIO DA TELA
-        //ALERTA: NAO MODIFICAR O TRECHO DE CODIGO, ACIMA.
+    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(out, &cursorInfo);
+    cursorInfo.bVisible = false;
+    SetConsoleCursorInfo(out, &cursorInfo);
+    short int CX = 0, CY = 0;
+    COORD coord;
+    coord.X = CX;
+    coord.Y = CY;
+    Temporizador tempo;
 
-    Padrao();
-    while (!FimDeJogo) {
-        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-        ImprimirMapa(coord);
+    while (true) {
+        MenuPrincipal();
+        Escopo_do_jogo();
+
+    while (true) {
+        Imprimir_Mapa(coord, 2, 10, 4); // PERSONALIZA AS CORES
         Movimentos();
-        Estrutura();
-        Sleep(100); // AJUSTA A VELOCIDADE DO JOGO
+        if (!Estrutura())
+            break;
+            Sleep(velocidade); // FAZ O AJUSTE DA VELOCIDADE
+        }
+        cout << "FIM DE JOGO, ESSA FOI SUA PONTUACAO: " << pontos << endl;
+        Jogador jogador;
+        cout << "Digite seu nome: ";
+        cin >> jogador.nome;
+        jogador.pontuacao = pontos;
+        ranking.push_back(jogador);
+        system("pause");
     }
+
     return 0;
 }
