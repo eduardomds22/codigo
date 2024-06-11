@@ -15,7 +15,7 @@ struct Jogador {
     int pontuacao;
 };
 
-// Função de comparação para ordenar os Scores em ordem decrescente
+// FUNCAO DE COMPARACAO
 bool CompararPontos(const Jogador& a, const Jogador& b) {
     return a.pontuacao > b.pontuacao;
 }
@@ -38,7 +38,7 @@ void SetColor(int value) {
 
 void Escopo_do_jogo() {
     FimDeJogo = false;
-    D_cursor = CIMA; // INICIA O MOVIMENTO PARA CIMA
+    D_cursor = DIREITA; // INICIA O MOVIMENTO PARA CIMA
     x = largura / 2;
     y = altura / 2;
     pontos = 0; // PONTUAÇÃO COMEÇA COM 0
@@ -53,10 +53,11 @@ void Escopo_do_jogo() {
     // PAREDES E MAPA
     for (int i = 0; i < altura; i++) {
         for (int j = 0; j < largura; j++) {
-            if (i == 0 || i == altura - 1 || j == 0 || j == largura - 1)
+            if (i == 0 || i == altura - 1 || j == 0 || j == largura - 1){
                 Mapa[i][j] = 1; // PAREDES
-            else
+            }else{
                 Mapa[i][j] = 0; // ESPAÇO JOGAVEL DO MAPA
+            }
         }
     }
 
@@ -73,6 +74,11 @@ void Imprimir_Mapa(COORD coord, int corCabeca, int corCorpo, int corMaca) {
     coord.X = 0;
     coord.Y = 0;
 
+    SetColor(11);
+    cout << "____________________" << endl;
+    cout << "   PONTUACAO = "<< pontos << endl;
+    cout << "____________________" << endl;
+    SetColor(6);
     for (int i = 0; i < altura; i++) {
         for (int j = 0; j < largura; j++) {
             if (i == y && j == x) {
@@ -104,9 +110,6 @@ void Imprimir_Mapa(COORD coord, int corCabeca, int corCorpo, int corMaca) {
         cout << endl;
     }
 
-    SetColor(11);
-    cout << "|PONTUACAO : " << pontos << endl;
-    SetColor(6);
 }
 
 // IMPLEMENTAÇÃO DA SOBRECARGA
@@ -207,7 +210,7 @@ void salvarRanking(const vector<Jogador>& ranking) {
     ofstream arquivo("ranking.txt");
 
     if (arquivo.is_open()) {
-        // Ordena o ranking antes de salvar
+        //FAZ A ORDENACAO ANTES DE SALVAR O ARQUIVO
         vector<Jogador> rankingOrdenado = ranking;
         sort(rankingOrdenado.begin(), rankingOrdenado.end(), CompararPontos);
 
@@ -216,11 +219,11 @@ void salvarRanking(const vector<Jogador>& ranking) {
         }
         arquivo.close();
     } else {
-        cout << "Erro ao abrir o arquivo de ranking!" << endl;
+        cout << "ERRO AO ABRIR O RANKING" << endl;
     }
 }
 
-// Função para carregar o ranking de um arquivo de texto
+//CARREGA O RANKING EM UM ARQUIVO DE TEXTO
 vector<Jogador> carregarRanking() {
     vector<Jogador> ranking;
     ifstream arquivo("ranking.txt");
@@ -232,27 +235,27 @@ vector<Jogador> carregarRanking() {
         }
         arquivo.close();
     } else {
-        cout << "Arquivo de ranking não encontrado. Iniciando com ranking vazio." << endl;
+        cout << "ARQUIVO DE RANKING NAO ENCONTRADO" << endl;
     }
 
     return ranking;
 }
 
-void verranking() {
+void verranking() { //VER RANKING DO JOGO
     vector<Jogador> ranking = carregarRanking();
 
     if (!ranking.empty()) {
         cout << "____________________________________________________________________  " << endl;
-        cout << "                           RANKING DE PONTUAÇÕES                       " << endl;
+        cout << "                           RANKING DE PONTUACOES                       " << endl;
         cout << "____________________________________________________________________  " << endl;
 
         int posicao = 1;
         for (const auto& jogador : ranking) {
-            cout << posicao << "º lugar: " << jogador.nome << " - " << jogador.pontuacao << " pontos" << endl;
+            cout << posicao << " LUGAR: " << jogador.nome << " - " << jogador.pontuacao << " PONTOS" << endl;
             posicao++;
         }
     } else {
-        cout << "O ranking está vazio." << endl;
+        cout << "RANKING VAZIO - AINDA NAO HA PONTUACOES ." << endl;
     }
 }
 
