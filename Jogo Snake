@@ -5,6 +5,7 @@
 #include <ctime>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 #include <thread>
 
 using namespace std;
@@ -12,10 +13,6 @@ using namespace std;
 struct Jogador {
     string nome;
     int pontuacao;
-};
-struct Temporizador{
-    int Tempo = 0;
-
 };
 
 // Função de comparação para ordenar os Scores em ordem decrescente
@@ -206,16 +203,57 @@ bool Estrutura() {
     return true; // RETORNA SE QUISER CONTINUAR
 }
 
-void verranking() {
-    sort(ranking.begin(), ranking.end(), CompararPontos);
-    for (const auto& jogador : ranking) {
-        cout << "____________________________________________________________________  " << endl;
-        cout << "                        !!!    RANKING  !!!                           " << endl;
-        cout << "\n";
-        cout << "Nome: " << jogador.nome << ", Pontuacao: " << jogador.pontuacao << endl;
-        cout << "____________________________________________________________________  " << endl;
+void salvarRanking(const vector<Jogador>& ranking) {
+    ofstream arquivo("ranking.txt");
+
+    if (arquivo.is_open()) {
+        // Ordena o ranking antes de salvar
+        vector<Jogador> rankingOrdenado = ranking;
+        sort(rankingOrdenado.begin(), rankingOrdenado.end(), CompararPontos);
+
+        for (const auto& jogador : rankingOrdenado) {
+            arquivo << jogador.nome << " " << jogador.pontuacao << endl;
+        }
+        arquivo.close();
+    } else {
+        cout << "Erro ao abrir o arquivo de ranking!" << endl;
     }
-    //system("pause");
+}
+
+// Função para carregar o ranking de um arquivo de texto
+vector<Jogador> carregarRanking() {
+    vector<Jogador> ranking;
+    ifstream arquivo("ranking.txt");
+
+    if (arquivo.is_open()) {
+        Jogador jogador;
+        while (arquivo >> jogador.nome >> jogador.pontuacao) {
+            ranking.push_back(jogador);
+        }
+        arquivo.close();
+    } else {
+        cout << "Arquivo de ranking não encontrado. Iniciando com ranking vazio." << endl;
+    }
+
+    return ranking;
+}
+
+void verranking() {
+    vector<Jogador> ranking = carregarRanking();
+
+    if (!ranking.empty()) {
+        cout << "____________________________________________________________________  " << endl;
+        cout << "                           RANKING DE PONTUAÇÕES                       " << endl;
+        cout << "____________________________________________________________________  " << endl;
+
+        int posicao = 1;
+        for (const auto& jogador : ranking) {
+            cout << posicao << "º lugar: " << jogador.nome << " - " << jogador.pontuacao << " pontos" << endl;
+            posicao++;
+        }
+    } else {
+        cout << "O ranking está vazio." << endl;
+    }
 }
 
 void MenuPrincipal() { // MENU PRINCIPAL
@@ -289,25 +327,26 @@ int main() {
     COORD coord;
     coord.X = CX;
     coord.Y = CY;
-    Temporizador tempo;
 
     while (true) {
         MenuPrincipal();
         Escopo_do_jogo();
 
-    while (true) {
-        Imprimir_Mapa(coord, 2, 10, 4); // PERSONALIZA AS CORES
-        Movimentos();
-        if (!Estrutura())
-            break;
+        while (true) {
+            Imprimir_Mapa(coord, 2, 10, 4); // PERSONALIZA AS CORES
+            Movimentos();
+            if (!Estrutura())
+                break;
             Sleep(velocidade); // FAZ O AJUSTE DA VELOCIDADE
         }
         cout << "FIM DE JOGO, ESSA FOI SUA PONTUACAO: " << pontos << endl;
         Jogador jogador;
-        cout << "Digite seu nome: ";
+        cout << "| DIGITE SEU NOME: ";
         cin >> jogador.nome;
         jogador.pontuacao = pontos;
         ranking.push_back(jogador);
+        salvarRanking(ranking);
+        cout << "\n | OBRIGADO POR JOGAR |" << endl;
         system("pause");
     }
 
