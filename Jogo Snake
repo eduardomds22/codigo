@@ -39,11 +39,11 @@ struct ConfiguracaoNivel {
 const ConfiguracaoNivel Mudancas_Dificuldade[] = {
 
     // FACIL
-    { 110, 15, 100, 3, 20, -30, 0,  -3, 2 },
+    { 150, 15, 100, 3, 20, -30, 0,  -3, 2 },
     // MEDIO
-    { 90, 12, 150, 5, 30, -40, 50,  -2, 4 },
+    { 120, 12, 150, 5, 30, -40, 50,  -2, 4 },
     // DIFICIL
-    { 70, 10, 200, 7, 50, -50, 100, -1, 5}
+    { 110, 10, 500, 7, 50, -50, 100, -1, 5}
 };
 // FUNCAO DE COMPARACAO
 bool CompararPontos(const Jogador& a, const Jogador& b) {
@@ -239,37 +239,47 @@ void Movimentos() {
                 break;
         }
     }
-    if (IaMode == true){
-        int MovimentoAleatorio = rand() % 50 + 1;
-        switch (MovimentoAleatorio) {
-            case 1: // CIMA
-                if (D_cursor != BAIXO) { // IMPEDE MOVIMENTOS CONTRARIOS
-                    D_cursor = CIMA;
-                    movimentoPressionado = true;
-                }
-                break;
-            case 2: // BAIXO
-                if (D_cursor != CIMA) { // IMPEDE MOVIMENTOS CONTRARIOS
-                    D_cursor = BAIXO;
-                    movimentoPressionado = true;
-                }
-                break;
-            case 3: // ESQUERDA
-                if (D_cursor != DIREITA) { // IMPEDE MOVIMENTOS CONTRARIOS
-                    D_cursor = ESQUERDA;
-                    movimentoPressionado = true;
-                }
-                break;
-            case 4: // DIREITA
-                if (D_cursor != ESQUERDA) { // IMPEDE MOVIMENTOS CONTRARIOS
-                    D_cursor = DIREITA;
-                    movimentoPressionado = true;
-                }
-                break;
+    if (IaMode == true) {
+    for (int i = 1; i < TamanhoDoCorpo; i++) {
+        if (CorpoX[i] == x && CorpoY[i] == y) {
+       velocidade -1;
         }
-
-
     }
+    int distNormal = abs(MacaX - x) + abs(MacaY - y);
+    int distEspecial = abs(MacaEspecialX - x) + abs(MacaEspecialY - y);
+
+    //VAI PARA A MAÇA MAIS PROXIMA
+    if (distEspecial <= distNormal) {
+        if (MacaEspecialX < x && D_cursor != DIREITA) {
+            D_cursor = ESQUERDA;
+            movimentoPressionado = true;
+        } else if (MacaEspecialX > x && D_cursor != ESQUERDA) {
+            D_cursor = DIREITA;
+            movimentoPressionado = true;
+        } else if (MacaEspecialY < y && D_cursor != BAIXO) {
+            D_cursor = CIMA;
+            movimentoPressionado = true;
+        } else if (MacaEspecialY > y && D_cursor != CIMA) {
+            D_cursor = BAIXO;
+            movimentoPressionado = true;
+        }
+    } else {
+        if (MacaX < x && D_cursor != DIREITA) {
+            D_cursor = ESQUERDA;
+            movimentoPressionado = true;
+        } else if (MacaX > x && D_cursor != ESQUERDA) {
+            D_cursor = DIREITA;
+            movimentoPressionado = true;
+        } else if (MacaY < y && D_cursor != BAIXO) {
+            D_cursor = CIMA;
+            movimentoPressionado = true;
+        } else if (MacaY > y && D_cursor != CIMA) {
+            D_cursor = BAIXO;
+            movimentoPressionado = true;
+        }
+    }
+}
+
     if (movimentoPressionado) {
         Cont_Movimentos++; //FAZ A CONTAGEM DE MOVIMENTOS
     }
@@ -326,7 +336,7 @@ bool Estrutura() {
     if (pontos % 50 == 0) {  // VERIFICA A QUANTIDADE DE MAÇAS COMIDAS
         velocidade -= 5;   // REDUZ A VELOCIDADE
     }
-    if (pontos >= 100) { // VERIFICA SE A PONTUAÇÃO ATINGIU 1000 PONTOS
+    if (pontos >= Mudancas_Dificuldade[nivel].pontuacaoVitoria) { // VERIFICA SE A PONTUAÇÃO ATINGIU 1000 PONTOS
         cout << "| PARABENS, VOCE CONSEGUIU ALIMENTAR TOTALMENTE A SNAKE E GANHOU O JOGO |" << endl;
         return false; // ENCERRA O JOGO - CONDIÇÃO DE VITORIA
     }
@@ -382,7 +392,7 @@ void salvarRanking(const vector<Jogador>& ranking) {
     ofstream arquivo("ranking.txt", ios::out);
 
     if (arquivo.is_open()) {
-        // Ordena o ranking antes de salvar
+
         vector<Jogador> rankingOrdenado = ranking;
         sort(rankingOrdenado.begin(), rankingOrdenado.end(), CompararPontos);
 
