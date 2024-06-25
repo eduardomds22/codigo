@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <fstream>
 #include <thread>
-#include <chrono>
 
 using namespace std;
 
@@ -238,7 +237,6 @@ void Imprimir_Mapa(COORD coord, int corCabeca, int corCorpo, int corMaca) //EXIB
 
     SetColor(11); //MOSTRA AS PONTUAÇÕES
     cout << "" << endl;
-    cout << "   TEMPO = " << segundosDecorridos << " SEGUNDOS" << endl;
     cout << "   PONTUACAO = " << pontos << endl;
     cout << "   MOVIMENTOS = " << Cont_Movimentos << endl;
     cout << "" << endl;
@@ -845,14 +843,10 @@ void MenuPrincipal()// MENU PRINCIPAL
         }
     }
 }
-void limparTela() {
-    system("cls");  // Limpa a tela do console (Windows)
-}
-
 
 int main()
 {
-    chrono::steady_clock::time_point inicio = chrono::steady_clock::now();
+
     int fase = 1;
     srand(time(0));
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -866,13 +860,12 @@ int main()
     coord.Y = CY;
     while (true)
     {
-        int segundos = segundosDecorridos(inicio);
+
         MenuPrincipal();
         Escopo_do_jogo(nivel);
         while (FimDeJogo != true)
         {
-            limparTela();
-            int segundos = segundosDecorridos(inicio);
+
             criar_mapa(fase);
             while (true)
             {
@@ -886,8 +879,6 @@ int main()
             {
                 fase = fase + 1;
             }
-            this_thread::sleep_for(chrono::seconds(1));  // Aguarda 1 segundo antes de limpar a tela e continuar
-            limparTela();  // Limpa a tela antes de mostrar a pontuação e pedir o nome
 
 
         }
