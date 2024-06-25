@@ -13,39 +13,44 @@ using namespace std;
 
 bool posicaoValida(int x, int y);
 
-enum Dificuldade
+enum Dificuldade //NIVEIS DE DIFICULDADE DO JOGO
 {
     FACIL,
     MEDIO,
     DIFICIL
 };
-struct Jogador
+
+struct Jogador //ARMAZENA DADOS DO JOGADOR PARA IMPLEMENTAR DENTRO DO RNKING
 {
     string nome;
     int pontuacao;
     int movimentos;
     Dificuldade dificuldade;
 };
-struct ConfiguracaoNivel
+
+struct ConfiguracaoNivel //CONFIGURAÇÕES ESPECIFICAS PARA CADA NIVEL DE DIFICULDADE
 {
-    int velocidade;
-    int frequenciaMaca;
-    int pontuacaoVitoria_1;
-    int pontuacaoVitoria_2;
-    int pontuacaoVitoria_3;
-    int tamanhoInicialCobra;
-    int pontosDourada;
-    int pontosVenenosa;
-    int pontosBonus;
-    int efeitoDourada;
-    int efeitoVenenosa;
+    int velocidade;           //VELOCIDADE DA COBRA
+    int frequenciaMaca;      //FREQUENCIA DE NASCIMENTO DA MAÇA
+    int pontuacaoVitoria_1;  //PONTUAÇÃO NECESSARIA PARA PASSAR O MAPA 1
+    int pontuacaoVitoria_2;  //PONTUAÇÃO NECESSARIA PARA PASSAR O MAPA 2
+    int pontuacaoVitoria_3;  //PONTUAÇÃO NECESSARIA PARA PASSAR O MAPA 3
+    int tamanhoInicialCobra; //TAMANHO QUE A COBRA VAI INICIAR
+    int pontosDourada;       //ATRIBUTOS REFERENTES A MAÇA DOURADA
+    int pontosVenenosa;      //ATRIBUTOS REFERENTES A MAÇA VENENOSA
+    int pontosBonus;         //ATRIBUTOS REFERENTES A MAÇA BONUS
+    int efeitoDourada;       //ATRIBUTOS REFERENTES A MAÇA DOURADA
+    int efeitoVenenosa;      //ATRIBUTOS REFERENTES A MAÇA DOURADA
 };
+
+
 int segundosDecorridos(const std::chrono::steady_clock::time_point& inicio) {
     auto atual = std::chrono::steady_clock::now();
     auto duracao = std::chrono::duration_cast<std::chrono::seconds>(atual - inicio);
     return duracao.count();
 }
-const ConfiguracaoNivel Mudancas_Dificuldade[] = {
+
+const ConfiguracaoNivel Mudancas_Dificuldade[] = { //CONFIGURAÇÕES ESPECIFICAS PARA CADA NIVEL DE DIFICULDADE
 
     // FACIL
     {150, 15, 100, 200, 300, 3, 20, -30, 0, -3, 2},
@@ -54,21 +59,23 @@ const ConfiguracaoNivel Mudancas_Dificuldade[] = {
     // DIFICIL
     {110, 10, 200, 300, 450, 7, 50, -50, 100, -1, 5}};
 
-// FUNCAO DE COMPARACAO
-bool CompararPontos(const Jogador &a, const Jogador &b)
+
+
+bool CompararPontos(const Jogador &a, const Jogador &b) //COMPARA OS PONTOS NO RANKING PARA ORDENALO
 {
     return a.pontuacao > b.pontuacao;
 }
 
-const int largura = 30;
-const int altura = 30;
-int Mapa[30][30];
-int x, y, MacaX, MacaY, pontos;
-int CorpoX[100], CorpoY[100];
-int TamanhoDoCorpo;
-int Cont_Movimentos = 0; // CONTAGEM DE MOVIMENTOS
-bool FimDeJogo = false;
-enum Direcao
+const int largura = 30;          //TAMANHO DO MAPA
+const int altura = 30;           //TAMANHO DO MAPA
+int Mapa[30][30];                //TAMANHO DO MAPA
+int x, y, MacaX, MacaY, pontos;  //DEFINE OS PONTOS E A MAÇA
+int CorpoX[100], CorpoY[100];    //TAMANHO MAXIMO DO CORPO DA COBRA
+int TamanhoDoCorpo;              //TAMANHO DO CORPO DA COBRA
+int Cont_Movimentos = 0;         // CONTAGEM DE MOVIMENTOS
+bool FimDeJogo = false;          //CONDIÇÃO PARA ENCERRAR O JOGO
+
+enum Direcao //DEFINE A DIREÇÃO QUE A COBRA VAI SER GERADA NO MAPA
 {
     PARADO = 0,
     ESQUERDA,
@@ -77,7 +84,8 @@ enum Direcao
     BAIXO
 };
 Direcao D_cursor; // DIREÇÕES
-enum TipoMaca
+
+enum TipoMaca //DECLARAÇÃO DAS MAÇAS PRESENTES NO JOGO
 {
     NORMAL,
     DOURADA,
@@ -87,49 +95,45 @@ enum TipoMaca
 TipoMaca tipoMaca;
 TipoMaca tipoMacaEspecial;
 int MacaEspecialX, MacaEspecialY;
-int velocidade = 110; // VELOCIDADE INICIAL
-vector<Jogador> ranking;
-bool IaMode = false;
-bool ModoDesafio = false;
+int velocidade = 110;        // VELOCIDADE INICIAL
+vector<Jogador> ranking;     //UTILIZADO PARA ARMAZENAR PONTOS NO ARQUIVO
+bool IaMode = false;         //MODO AUTOMATICO DE JOGO
+bool ModoDesafio = false;    //MODO DESAFIO
+int nivel = FACIL;           //DEFINE COMO PADRÃO O MODO DE JOGO FACIL
 
-void SetColor(int value)
+
+void SetColor(int value)     //UTILIZADA PARA DAR COR NO JOGO
 {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), value);
 }
 
-int nivel = FACIL;
 
-// VERIFICA SE O ESPAÇO DO MAPA ESTA SENDO OCUPADO PELO CORPO DA COBRA
-bool posicaoValida(int x, int y) {
-    // Verifica se a posição (x, y) está dentro dos limites do mapa
-    if (x <= 0 || x >= largura - 1 || y <= 0 || y >= altura - 1) {
+bool posicaoValida(int x, int y) { // VERIFICA SE O ESPAÇO DO MAPA ESTA SENDO OCUPADO PELO CORPO DA COBRA
+
+        if (x <= 0 || x >= largura - 1 || y <= 0 || y >= altura - 1) { //VERIFICA SE É UMA POSIÇÃO VALIDA NO MAPA
         return false;
-    }
+        }
 
-    // Verifica se a posição (x, y) não coincide com qualquer parte do corpo da cobra
-    for (int i = 0; i < TamanhoDoCorpo; i++) {
+    for (int i = 0; i < TamanhoDoCorpo; i++) {  //VERIFICA SE A POSIÇÃO NÃO É A MESMA QUE O CORPO DA COBRA
         if (CorpoX[i] == x && CorpoY[i] == y) {
             return false;
         }
     }
 
-    // Verifica se a posição (x, y) não coincide com paredes
-    if (Mapa[y][x] == 1) {
+        if (Mapa[y][x] == 1) {  //VERIFICA SE A POSIÇÃO NÃO É UMA PAREDE
         return false;
     }
 
-    return true;
+        return true;
 }
 
-void criar_mapa(int fase)
-{
+void criar_mapa(int fase) { //INICIA OS MAPAS COM PAREDES E OBSTACULOS DIFERENTES
 
     // PAREDES E MAPA
-    for (int i = 0; i < altura; i++)
-    {
+    for (int i = 0; i < altura; i++){
         for (int j = 0; j < largura; j++)
         {
-            if (i == 0 || i == altura - 1 || j == 0 || j == largura - 1)
+            if (i == 0 || i == altura - 1 || j == 0 || j == largura - 1) //MAPA DA FASE 1
             {
                 Mapa[i][j] = 1; // PAREDES
             }
@@ -140,22 +144,22 @@ void criar_mapa(int fase)
         }
     }
 
-    if (fase == 2)
-    {
+    if (fase == 2) { //MAPA DA FASE 2
         x = largura /15;
         y = altura / 15;
         for (int i = 0; i < altura; i++)
         {
             for (int j = 0; j < largura; j++)
             {
-                if ((i == 15 || j == 15) && (i > 5 && i < 25) && (j > 5 && j < 25)) //FAZ A CRUZ
+                if ((i == 15 || j == 15) && (i > 5 && i < 25) && (j > 5 && j < 25)) //FAZ UMA CRUZ
                 {
                     Mapa[i][j] = 1; // PAREDES
                 }
             }
         }
     }
-    if(fase == 3){
+
+    if(fase == 3){ //MAPA DA FASE 3
         x = largura /15;
         y = altura / 15;
         for (int i = 0; i < altura; i++)
@@ -179,8 +183,8 @@ void criar_mapa(int fase)
     }
 }
 
-void Escopo_do_jogo(int nivel)
-{
+void Escopo_do_jogo(int nivel) { //INICIA O JOGO COM A ESTRUTURA QUE FOI DEFINIDA PELO MODO DE JOGO, NIVEL OU MAPA
+
     if (ModoDesafio == false)
     {
         FimDeJogo = false;
@@ -213,7 +217,7 @@ void Escopo_do_jogo(int nivel)
     {
         MacaX = rand() % (largura - 2) + 1;
         MacaY = rand() % (altura - 2) + 1;
-    } while (Mapa[MacaY][MacaX] != 0 || (MacaX == x && MacaY == y));
+    } while (Mapa[MacaY][MacaX] != 0 || (MacaX == x && MacaY == y) || posicaoValida(MacaX, MacaY));;
     tipoMaca = NORMAL;
 
     // POSICAO INICIAL DA MAÇÃ ESPECIAL
@@ -222,23 +226,24 @@ void Escopo_do_jogo(int nivel)
         MacaEspecialX = rand() % (largura - 2) + 1;
         MacaEspecialY = rand() % (altura - 2) + 1;
     } while (Mapa[MacaEspecialY][MacaEspecialX] != 0 || !posicaoValida(MacaEspecialX, MacaEspecialY) || (MacaEspecialX == x && MacaEspecialY == y));
-    tipoMacaEspecial = static_cast<TipoMaca>(rand() % 3 + 1); // GERA AS MAÇAS ESPECIAIS
+        tipoMacaEspecial = (TipoMaca)(rand() % 3 + 1); // GERA AS MAÇAS ESPECIAIS
 }
 
-void Imprimir_Mapa(COORD coord, int corCabeca, int corCorpo, int corMaca)
+void Imprimir_Mapa(COORD coord, int corCabeca, int corCorpo, int corMaca) //EXIBE O MAPA DO JOGO E O SEUS ELEMENTOS, COMO PAREDES, CORPO E CABEÇA DA COBRA E AS MAÇAS
 {
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
     SetColor(6);
     coord.X = 0;
     coord.Y = 0;
 
-    SetColor(11);
+    SetColor(11); //MOSTRA AS PONTUAÇÕES
     cout << "" << endl;
     cout << "   TEMPO = " << segundosDecorridos << " SEGUNDOS" << endl;
     cout << "   PONTUACAO = " << pontos << endl;
     cout << "   MOVIMENTOS = " << Cont_Movimentos << endl;
     cout << "" << endl;
     SetColor(6);
+
     for (int i = 0; i < altura; i++)
     {
         for (int j = 0; j < largura; j++)
@@ -313,7 +318,7 @@ void Imprimir_Mapa(COORD coord)
     Imprimir_Mapa(coord, 10, 10, 4); // CORES PADRAO NO JOGO
 }
 
-void Movimentos()
+void Movimentos() //REALIZA OS MOVIMENTOS DENTRO DO JOGO
 {
 
     bool movimentoPressionado = false; // VERIFICA AS TECLAS PRESSIONADAS
@@ -362,7 +367,7 @@ void Movimentos()
         {
             if (CorpoX[i] == x && CorpoY[i] == y)
             {
-                velocidade - 1;
+                velocidade -= 1;
             }
         }
         int distNormal = abs(MacaX - x) + abs(MacaY - y);
@@ -423,7 +428,7 @@ void Movimentos()
     }
 }
 
-bool Estrutura(int fase)
+bool Estrutura(int fase) //FAZ AS VERIFICAÇÕES NECESSARIAS PARA ATUALIZAR O JOGO
 {
     int prevX = CorpoX[0];
     int prevY = CorpoY[0];
@@ -459,14 +464,14 @@ bool Estrutura(int fase)
         break;
     }
 
-    // COLISÃO COM AS PAREDES
+    // VERIFICA COLISÃO COM AS PAREDES
     if (Mapa[y][x] == 1)
     {
         FimDeJogo = true;
         return false; // ENCERRA O JOGO CASO COLIDA COM O AS PAREDES
     }
 
-    // COLISÃO COM O PROPRIO CORPO
+    // VERIFICA COLISÃO COM O PROPRIO CORPO
     for (int i = 1; i < TamanhoDoCorpo; i++)
     {
         if (CorpoX[i] == x && CorpoY[i] == y)
@@ -538,9 +543,9 @@ bool Estrutura(int fase)
             MacaY = rand() % (altura - 2) + 1;  // GERA AS MAÇAS DENTRO DO ESPAÇO PERMITIDO
         } while (Mapa[MacaY][MacaX] != 0 || !posicaoValida(MacaX, MacaY));
        if (ModoDesafio) {
-            TamanhoDoCorpo--; // Diminui o tamanho da cobra no modo desafio
+            TamanhoDoCorpo--; // REDUZ O TAMANHO DA COBRA NO MODO DESAFIO
         } else {
-            TamanhoDoCorpo++; // Aumenta o tamanho da cobra normalmente
+            TamanhoDoCorpo++; // REDUZ O TAMANHO DA COBRA NO MODO DESAFIO
         }
     }
 
@@ -551,7 +556,7 @@ bool Estrutura(int fase)
                 pontos += Mudancas_Dificuldade[nivel].pontosDourada;
                 velocidade += Mudancas_Dificuldade[nivel].efeitoDourada;
                 if (ModoDesafio) {
-                    TamanhoDoCorpo++; // Aumenta o tamanho da cobra no modo desafio
+                    TamanhoDoCorpo++; //AUMENTA O TAMANHO DA COBRA NO MODO DESAFIO
                 } else {
                     if (TamanhoDoCorpo > 3) {
                         TamanhoDoCorpo--; // DIMINUI O CORPO DA COBRA
@@ -562,7 +567,7 @@ bool Estrutura(int fase)
                 pontos = max(0, pontos + Mudancas_Dificuldade[nivel].pontosVenenosa);
                 velocidade -= Mudancas_Dificuldade[nivel].efeitoVenenosa;
                 if (ModoDesafio) {
-                    TamanhoDoCorpo--; // Diminui o tamanho da cobra no modo desafio
+                    TamanhoDoCorpo--; // // REDUZ O TAMANHO DA COBRA NO MODO DESAFIO
                 } else {
                     TamanhoDoCorpo += 2; // AUMENTA O CORPO DA COBRA
                 }
@@ -585,7 +590,7 @@ bool Estrutura(int fase)
     return true; // RETORNA SE QUISER CONTINUAR
 }
 
-void salvarRanking(const vector<Jogador> &ranking)
+void salvarRanking(const vector<Jogador> &ranking) //SALVA AS PONTUAÇÕES NO ARQUIVO
 {
     ofstream arquivo("ranking.txt", ios::out);
 
@@ -623,7 +628,7 @@ void salvarRanking(const vector<Jogador> &ranking)
     }
 }
 
-vector<Jogador> carregarRanking()
+vector<Jogador> carregarRanking() //CARREGA O RANKING MOSTRANDO AS PONTUAÇÕES
 {
     vector<Jogador> ranking;
     ifstream arquivo("ranking.txt", ios::in);
@@ -656,8 +661,8 @@ vector<Jogador> carregarRanking()
     return ranking;
 }
 
-void verranking()
-{ // VER RANKING DO JOGO
+void verranking()// VER RANKING DO JOGO
+{
     vector<Jogador> ranking = carregarRanking();
 
     if (!ranking.empty())
@@ -695,8 +700,8 @@ void verranking()
     }
 }
 
-void MenuPrincipal()
-{ // MENU PRINCIPAL
+void MenuPrincipal()// MENU PRINCIPAL
+{
     SetColor(6);
     srand(time(NULL));
     int escolha;
@@ -848,7 +853,7 @@ void limparTela() {
 int main()
 {
     chrono::steady_clock::time_point inicio = chrono::steady_clock::now();
-    int fase = 2;
+    int fase = 1;
     srand(time(0));
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_CURSOR_INFO cursorInfo;
