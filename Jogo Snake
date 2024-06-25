@@ -43,20 +43,14 @@ struct ConfiguracaoNivel //CONFIGURAÇÕES ESPECIFICAS PARA CADA NIVEL DE DIFICU
 };
 
 
-int segundosDecorridos(const std::chrono::steady_clock::time_point& inicio) {
-    auto atual = std::chrono::steady_clock::now();
-    auto duracao = std::chrono::duration_cast<std::chrono::seconds>(atual - inicio);
-    return duracao.count();
-}
-
 const ConfiguracaoNivel Mudancas_Dificuldade[] = { //CONFIGURAÇÕES ESPECIFICAS PARA CADA NIVEL DE DIFICULDADE
 
     // FACIL
-    {150, 15, 100, 200, 300, 3, 20, -30, 0, -3, 2},
+    {150, 15, 120, 200, 280, 3, 20, -10, 20, -2, 1},
     // MEDIO
-    {120, 12, 150, 250, 350, 5, 30, -40, 50, -2, 4},
+    {120, 12, 200, 300, 400, 5, 30, -20, 50, -2, 2},
     // DIFICIL
-    {110, 10, 200, 300, 450, 7, 50, -50, 100, -1, 5}};
+    {110, 10, 250, 350, 450, 7, 50, -30, 100, -1, 3}};
 
 
 
@@ -151,7 +145,7 @@ void criar_mapa(int fase) { //INICIA OS MAPAS COM PAREDES E OBSTACULOS DIFERENTE
             for (int j = 0; j < largura; j++)
             {
                 if ((i == 15 || j == 15) && (i > 5 && i < 25) && (j > 5 && j < 25)) //FAZ UMA CRUZ
-                {
+                {   
                     Mapa[i][j] = 1; // PAREDES
                 }
             }
@@ -164,7 +158,7 @@ void criar_mapa(int fase) { //INICIA OS MAPAS COM PAREDES E OBSTACULOS DIFERENTE
         for (int i = 0; i < altura; i++)
         {
             for (int j = 0; j < largura; j++)
-            {
+            {    
                 if (i == 20 && (j < 20 && j > 10 )) // FAZ A LINHA DEBAIXO DO QUADRADO
                 {
                     Mapa[i][j] = 1; // PAREDES
@@ -202,7 +196,7 @@ void Escopo_do_jogo(int nivel) { //INICIA O JOGO COM A ESTRUTURA QUE FOI DEFINID
         x = largura / 2;
         y = altura / 2;
         pontos = 0; // PONTUAÇÃO COMEÇA COM 0
-        TamanhoDoCorpo = 100;
+        TamanhoDoCorpo = 50;
         Cont_Movimentos = 0;
     }
     for (int i = 0; i < TamanhoDoCorpo; i++)
@@ -797,6 +791,7 @@ void MenuPrincipal()// MENU PRINCIPAL
                 cout << "____________________________________________________________________  " << endl;
                 cout << "                  DIFICULDADE ALTERADA - FACIL                        " << endl;
                 cout << "____________________________________________________________________  " << endl;
+                ModoDesafio=false;
                 Sleep(2000);
                 system("cls");
                 break;
@@ -806,6 +801,7 @@ void MenuPrincipal()// MENU PRINCIPAL
                 cout << "____________________________________________________________________  " << endl;
                 cout << "                  DIFICULDADE ALTERADA - MEDIO                        " << endl;
                 cout << "____________________________________________________________________  " << endl;
+                ModoDesafio=false;
                 Sleep(2000);
                 system("cls");
                 break;
@@ -814,11 +810,18 @@ void MenuPrincipal()// MENU PRINCIPAL
                 cout << "____________________________________________________________________  " << endl;
                 cout << "                  DIFICULDADE ALTERADA - DIFICIL                      " << endl;
                 cout << "____________________________________________________________________  " << endl;
+                ModoDesafio=false;
                 Sleep(2000);
                 system("cls");
                 break;
             case 4:
-                ModoDesafio = true;
+                if (ModoDesafio == false){
+                    ModoDesafio = true;
+                }
+                else{
+                    ModoDesafio = false;
+                }
+
                 cout << "____________________________________________________________________  " << endl;
                 cout << "                  DIFICULDADE ALTERADA - MODO DESAFIO                 " << endl;
                 cout << "____________________________________________________________________  " << endl;
